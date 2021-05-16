@@ -4,6 +4,7 @@
 
 import json
 import os
+import twarc
 
 
 class Config:
@@ -19,6 +20,7 @@ def _read_config(source):
     """
         Read configuration from source into a dictionary
     """
+
     result = {}
     for config, default in config_vars.items():
         t = type(default)
@@ -28,15 +30,13 @@ def _read_config(source):
 
 
 def _get_file_config(testing=False):
-
     """
         Read configuration from file
     """
 
     file_name = 'config.json'
-    file_path = 'TextSummarizationLab21/' + file_name
 
-    with open(file_path) as f:
+    with open(file_name) as f:
         file_config = json.load(f)
         return _read_config(file_config)
 
