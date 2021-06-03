@@ -187,7 +187,7 @@ class TweetAPI:
         tweets.sort(key=lambda x: x["created_at"])
         res = []
         for t in tweets:
-            res.append("{}:{}\n".format(t["username"], t["text"]))
+            res.append("{}: {}\n".format(t["username"], t["text"]))
 
         return {conv_id: res}
 
