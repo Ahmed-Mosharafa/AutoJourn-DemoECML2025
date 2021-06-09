@@ -1,7 +1,7 @@
 import config
 import json
-from tweet_api.TweetAPI import TweetAPI
-
+from twitter_api.twitter_api import TweetAPI
+from
 if __name__ == '__main__':
     config.init()
     api = TweetAPI()
