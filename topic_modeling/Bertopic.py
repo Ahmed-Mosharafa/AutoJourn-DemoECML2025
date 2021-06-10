@@ -6,7 +6,11 @@ from umap import UMAP
 
 class Bertopic(TopicModeling):
 
+    def __init__(self):
+        self.__int__(None)
+
     def __int__(self, num_topics=None):
+        super(Bertopic, self).__init__()
         umap_model = UMAP(n_neighbors=15,
                           transform_seed=173,  # fix a seed to avoid randomization in UMAP (we use a prime number)
                           n_components=5,
@@ -22,7 +26,9 @@ class Bertopic(TopicModeling):
                               umap_model=umap_model)
 
     def get_topics(self, docs):
-        return self.model.fit_transform(docs)
+        _, probs = self.model.fit_transform(docs)
+        topics_df = self.model.get_topic_info()
+        return topics_df, probs
 
     def preprocess(self, tweet):
         t_tweet = re.sub(r"http\S+", "", tweet)  # remove links

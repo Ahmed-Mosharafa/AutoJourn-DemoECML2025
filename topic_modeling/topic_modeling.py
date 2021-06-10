@@ -49,6 +49,7 @@ class TopicModeling(ABC):
             while processed_doc in doc_conv_dict:
                 processed_doc += "."
 
+            doc_conv_dict[processed_doc] = conv_id
             docs.append(processed_doc)
 
         return docs, doc_conv_dict
@@ -86,36 +87,34 @@ class TopicModeling(ABC):
         conversation to get the topic probabilities for each conversation.
 
         :param data: List[{conv_id:String -> tweets:[String]}]
-        :return: <conv_topic_probs_df: DataFrame, topics_df DataFrame>:
+        :return: <conv_topic_probs_df.to_json():String, topics_df.to_json():String>:
             1- conv_topic_probs_df: each row is for a conversation and each column represent a topic probability.
             2- topics_df: each row is a topic and its assigned name based on tf-idf (i.e., top terms
                 indicating the topic)
         """
 
         docs, tweet_conv_dict, processed_origin_tweet_dict = self.__flatten_tweets(data)  # each tweet is a document
-        topics_df, probs = self.get_topics(data)
 
-        conv_tweet_topic_prob = {}
+        topics_df, probs = self.get_topics(docs)
+
+        conv_tweet_topic_prob_dict = {}
         for idx, tweet in enumerate(docs):
             t_probs = probs[idx]
             t_conv = tweet_conv_dict[processed_origin_tweet_dict[tweet]]
 
-            if t_conv not in conv_tweet_topic_prob:
-                conv_tweet_topic_prob[t_conv] = []
+            if t_conv not in conv_tweet_topic_prob_dict:
+                conv_tweet_topic_prob_dict[t_conv] = []
 
-            conv_tweet_topic_prob[t_conv].append(t_probs)
+            conv_tweet_topic_prob_dict[t_conv].append(t_probs)
 
-        conv_topic_probs = {}
-        for conv_id, tweets_tprobs in conv_tweet_topic_prob.items():
+        conv_topic_probs_dict = {}
+        for conv_id, tweets_tprobs in conv_tweet_topic_prob_dict.items():
             mat = np.stack(tweets_tprobs, axis=0)  # create np matrix from list[np array] for faster computations
             conv_tprobs = np.average(mat, axis=0)  # compute average <tweet, topic> probability for each topic
-            conv_topic_probs[conv_id] = conv_tprobs
+            conv_topic_probs_dict[conv_id] = conv_tprobs.tolist()
 
-        # transpose to make the rows for conversations and columns are topics probabilities
-        conv_topic_probs_df = pd.DataFrame(conv_topic_probs).transpose()
-        conv_topic_probs_df = conv_topic_probs_df.reset_index().rename(columns={"index": "conv_id"})
-
-        return conv_topic_probs_df, topics_df
+        topics_id_name_dict = {row["Topic"]: row["Name"] for index, row in topics_df.iterrows()}
+        return conv_topic_probs_dict, topics_id_name_dict
 
     def run_con_topic_modeling(self, data):
         """
@@ -130,15 +129,12 @@ class TopicModeling(ABC):
         """
 
         docs, doc_conv_dict = self.__merge_tweets(data)  # each conversation is a document
-        topics_df, probs = self.get_topics(data)
+        topics_df, probs = self.get_topics(docs)
 
-        conv_topic_probs = {}
+        conv_topic_probs_dict = {}
         for idx, d in enumerate(docs):
             conv_id = doc_conv_dict[d]
-            conv_topic_probs[conv_id] = probs[idx]
+            conv_topic_probs_dict[conv_id] = probs[idx].tolist()
 
-        # transpose to make the rows for conversations and columns are topics probabilities
-        conv_topic_probs_df = pd.DataFrame(conv_topic_probs).transpose()
-        conv_topic_probs_df = conv_topic_probs_df.reset_index().rename(columns={"index": "conv_id"})
-
-        return conv_topic_probs_df, topics_df
+        topics_id_name_dict = {row["Topic"]: row["Name"] for index, row in topics_df.iterrows()}
+        return conv_topic_probs_dict, topics_id_name_dict
