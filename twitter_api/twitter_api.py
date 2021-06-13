@@ -1,5 +1,5 @@
 import twarc
-import tweet_api.fields as fields
+import twitter_api.fields as fields
 import time
 import logging
 import config as config
@@ -66,6 +66,9 @@ class TweetAPI:
         conversations = set()
         page = 0
         for response_page in self.__search_recent(query, max_results=max_page_results):
+            if "data" not in response_page:
+                break
+
             tweets = response_page["data"]
             page += 1
 
@@ -95,6 +98,15 @@ class TweetAPI:
         resp = self.T.get(url, params=params)
         page = resp.json()
 
+        if "data" not in page:
+            print("No Data ===> ", page)
+
+        if "includes" not in page:
+            print("No includes ---> ", page)
+
+        if ("data" not in page) or ("includes" not in page):  # tweet doesn't exist (maybe was deleted)
+            return None
+
         # add username of the tweet's author to the data dict to return only the data dict.
         page["data"]["username"] = page["includes"]["users"][0]["username"]
         return page["data"]
@@ -105,6 +117,15 @@ class TweetAPI:
         :param response: (dict): the response holding the tweets of a specific conversation
         :return: generator[dict]: a generator, dict for each paginated response.
         """
+        if "data" not in response:
+            print("No Data ===> ", response)
+
+        if "includes" not in response:
+            print("No includes ---> ", response)
+
+        if ("data" not in response) or ("includes" not in response):  # No results
+            return [None]
+
         # map from user Id to username
         id_username_dict = {u["id"]: u["username"] for u in response["includes"]["users"]}
         tweets = response["data"]
@@ -187,6 +208,7 @@ class TweetAPI:
             if len(response_page["data"]) < max_results:  # all tweets are fetched
                 break
 
+        tweets = [t for t in tweets if t is not None]  # remove all Nones
         return parse_func(conv_id, tweets)
 
     def get_conversations(self, search_keyword, max_num_conv=10, max_num_pages=10,

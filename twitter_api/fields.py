@@ -30,7 +30,7 @@ USER_FIELDS = [
 ]
 
 TWEET_FIELDS = [
-    "attachments",
+    # "attachments",
     "author_id",
     "context_annotations",
     "conversation_id",

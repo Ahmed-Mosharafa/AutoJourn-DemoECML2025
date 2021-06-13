@@ -8,9 +8,10 @@ import twarc
 
 
 class Config:
-    # General config (default value is empty)
+    # General config
     CONSUMER_KEY = ""
     CONSUMER_SECRET = ""
+    TOPIC_PER_TWEET = False
 
 
 config_vars = {config: t for config, t in vars(Config).items() if not config.startswith('__')}
@@ -25,7 +26,8 @@ def _read_config(source):
     for config, default in config_vars.items():
         t = type(default)
         if config in source:
-            result[config] = t(source[config])
+            result[config] = t(source[config]) if t is not bool else str(source[config]).lower() == 'true'
+
     return result
 
 
