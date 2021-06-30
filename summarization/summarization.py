@@ -31,9 +31,11 @@ class Summarization(ABC):
         conv_summary_dict = {}
         for conv_dict in data:
             conv_id, tweets = next(iter(conv_dict.items()))  # each conv dictionary has one item {conv_id: [tweet]}
+            print(conv_id)
             merged_tweets = ''.join(tweets)
             preprocessed_tweets = self.preprocess(merged_tweets)
             summary = self.summarize(preprocessed_tweets)
+            print(summary)
             conv_summary_dict[conv_id] = summary
 
         return conv_summary_dict
