@@ -13,18 +13,14 @@ curl http://127.0.0.1:8787/search?query="Football"  > data.json
 #### Example:
 ##### Request:
 ```bash
-curl --header "Content-Type: application/json" \
-  --request GET --data "@data.json" \
-  http://127.0.0.1:8787/topics?num_topics=10 > topics.json```
+curl --header "Content-Type: application/json" --request GET --data "@data.json"  http://127.0.0.1:8787/topics?num_topics=10 > topics.json
 ```
 
 ### **[GET]** `/summarize`
 #### Example:
 ##### Request:
 ```bash
-curl --header "Content-Type: application/json" \
-  --request GET --data "@data.json" \
-  http://127.0.0.1:8787/summarize > summaries.json```
+curl --header "Content-Type: application/json" --request GET --data "@data.json" http://127.0.0.1:8787/summarize > summaries.json
 ```
 
 
