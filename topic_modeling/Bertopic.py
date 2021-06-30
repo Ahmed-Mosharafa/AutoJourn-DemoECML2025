@@ -1,23 +1,27 @@
 from topic_modeling.topic_modeling import TopicModeling
-import re
 from bertopic import BERTopic
 from umap import UMAP
+import re
+import numpy as np
 
 
 class Bertopic(TopicModeling):
+    """
+    Topic Modeling using Bertopic: https://maartengr.github.io/BERTopic/tutorial/algorithm/algorithm.html
 
-    def __init__(self):
-        self.__int__(None)
+    Note: The probability distribution of topics for each document outputted by the model is not a true probability
+    distribution (i.e., topic probabilities for one document sum to 1). It merely shows how confident BERTopic is that
+    certain topics can be found in a document.
+    """
 
-    def __int__(self, num_topics=None):
-        super(Bertopic, self).__init__()
+    def __init__(self, num_topics=None):
         umap_model = UMAP(n_neighbors=15,
                           transform_seed=173,  # fix a seed to avoid randomization in UMAP (we use a prime number)
                           n_components=5,
                           min_dist=0.0,
                           metric='cosine')
 
-        self.model = BERTopic(nr_topics=num_topics,
+        self.model = BERTopic(nr_topics=None,
                               language="multilingual",  # Use multilingual sentence-tranformers embedding model
                               top_n_words=5,
                               calculate_probabilities=True,
@@ -25,10 +29,20 @@ class Bertopic(TopicModeling):
                               n_gram_range=(1, 1),
                               umap_model=umap_model)
 
+        self.num_topics = num_topics
+
     def get_topics(self, docs):
-        _, probs = self.model.fit_transform(docs)
+        topics, probs = self.model.fit_transform(docs)  # fit the model to compute the topics
+        # reduce the number of topics to self.num_topics
+        _, new_probs = self.model.reduce_topics(docs, topics, probabilities=probs, nr_topics=self.num_topics)
+        # topic_df which hold in each row the topic number and name
         topics_df = self.model.get_topic_info()
-        return topics_df, probs
+        # remove outlier topic which has topic number = -1
+        topics_df = topics_df[topics_df["Topic"] != -1]
+        num_topics = len(topics_df)
+        # new_probs has the same shape as probs. We will remove the columns of reduced topics (has zero probability)
+        new_probs = np.apply_along_axis(lambda doc_prob: doc_prob[:num_topics], axis=1, arr=probs)
+        return topics_df, new_probs
 
     def preprocess(self, tweet):
         t_tweet = re.sub(r"http\S+", "", tweet)  # remove links
