@@ -14,7 +14,7 @@ class Bertopic(TopicModeling):
     certain topics can be found in a document.
     """
 
-    def __init__(self, num_topics=None):
+    def __init__(self):
         umap_model = UMAP(n_neighbors=15,
                           transform_seed=173,  # fix a seed to avoid randomization in UMAP (we use a prime number)
                           n_components=5,
@@ -29,19 +29,16 @@ class Bertopic(TopicModeling):
                               n_gram_range=(1, 1),
                               umap_model=umap_model)
 
-        self.num_topics = num_topics
-
-    def get_topics(self, docs):
+    def get_topics(self, docs, num_topics):
         topics, probs = self.model.fit_transform(docs)  # fit the model to compute the topics
         # reduce the number of topics to self.num_topics
-        _, new_probs = self.model.reduce_topics(docs, topics, probabilities=probs, nr_topics=self.num_topics)
+        _, new_probs = self.model.reduce_topics(docs, topics, probabilities=probs, nr_topics=num_topics)
         # topic_df which hold in each row the topic number and name
         topics_df = self.model.get_topic_info()
         # remove outlier topic which has topic number = -1
         topics_df = topics_df[topics_df["Topic"] != -1]
-        num_topics = len(topics_df)
         # new_probs has the same shape as probs. We will remove the columns of reduced topics (has zero probability)
-        new_probs = np.apply_along_axis(lambda doc_prob: doc_prob[:num_topics], axis=1, arr=probs)
+        new_probs = np.apply_along_axis(lambda doc_prob: doc_prob[:len(topics_df)], axis=1, arr=probs)
         return topics_df, new_probs
 
     def preprocess(self, tweet):

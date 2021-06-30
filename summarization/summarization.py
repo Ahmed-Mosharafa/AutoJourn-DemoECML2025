@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+
 class Summarization(ABC):
 
     @abstractmethod
@@ -20,8 +21,21 @@ class Summarization(ABC):
         """
         pass
 
-    def run(self, tweets):
-        merged_tweets = ''.join(tweets)
-        preprocessed_tweets = self.preprocess(merged_tweets)
+    def run(self, data):
+        """
+        Run text summarization model on tweet conversations in SAMSum format. It outputs a summary to each conversation.
 
-        return self.summarize(preprocessed_tweets)
+        :param data: List[{conv_id:String -> tweets:[String]}]
+        :return: conv_summary_dict: Dict{conv_id:String -> summary:String}
+        """
+        conv_summary_dict = {}
+        for conv_dict in data:
+            conv_id, tweets = next(iter(conv_dict.items()))  # each conv dictionary has one item {conv_id: [tweet]}
+            print(conv_id)
+            merged_tweets = ''.join(tweets)
+            preprocessed_tweets = self.preprocess(merged_tweets)
+            summary = self.summarize(preprocessed_tweets)
+            print(summary)
+            conv_summary_dict[conv_id] = summary
+
+        return conv_summary_dict

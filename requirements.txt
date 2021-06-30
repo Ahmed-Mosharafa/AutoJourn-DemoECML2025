@@ -7,12 +7,18 @@ click-plugins==1.1.1
 configobj==5.0.6
 Cython==0.29.23
 filelock==3.0.12
+Flask==2.0.1
+gevent==21.1.2
+greenlet==1.1.0
 hdbscan==0.8.27
 huggingface-hub==0.0.8
 idna==2.10
 importlib-metadata==4.5.0
+itsdangerous==2.0.1
+Jinja2==3.0.1
 joblib==1.0.1
 llvmlite==0.36.0
+MarkupSafe==2.0.1
 nltk==3.6.2
 numba==0.53.1
 numpy==1.20.3
@@ -45,4 +51,7 @@ twarc==2.0.12
 typing-extensions==3.10.0.0
 umap-learn==0.5.1
 urllib3==1.26.4
+Werkzeug==2.0.1
 zipp==3.4.1
+zope.event==4.5.0
+zope.interface==5.4.0
