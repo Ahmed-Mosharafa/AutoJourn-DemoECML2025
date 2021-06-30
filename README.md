@@ -46,7 +46,7 @@ $ set -a; source .env; set +a
 $ gunicorn -w <number_of_worker_processes> -b <host_ip> -k gevent ratimator.app:app / 
    --timeout <worker timeout in seconds> --keep-alive <keep request connection live time in seconds> /
    --access-logfile -
- #### Example:
-```bash
-gunicorn -w 4 -b localhost:8787 -k gevent app:app --timeout 1000 --keep-alive 1000 --access-logfile -
-```
+   
+ // Example:
+ gunicorn -w 4 -b localhost:8787 -k gevent app:app --timeout 1000 --keep-alive 1000 --access-logfile -
+ ```
