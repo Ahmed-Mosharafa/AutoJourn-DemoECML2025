@@ -5,7 +5,7 @@ import re
 
 class BartSummarizationModel(Summarization):
     def __init__(self):
-        self.summarizer = pipeline("summarization", model="lidiya/bart-large-xsum-samsum")
+        self.summarizer = pipeline("summarization", model="lidiya/bart-base-samsum")
 
     def preprocess(self, conversation):
         # Remove links
