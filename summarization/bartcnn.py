@@ -5,7 +5,7 @@ import re
 
 class BartSummarizationModel(Summarization):
     def __init__(self):
-        self.summarizer = pipeline("summarization", model="philschmid/bart-large-cnn-samsum")
+        self.summarizer = pipeline("summarization", model="lidiya/bart-base-samsum")
 
     def preprocess(self, conversation):
         # Remove links
@@ -18,8 +18,8 @@ class BartSummarizationModel(Summarization):
 
     def summarize(self, conversation):
         summary = ""
-        for i in range(0, len(conversation), 1024):
-            part_summary = self.summarizer(conversation[i: min(i + 1024, len(conversation))])[0]["summary_text"]
+        for i in range(0, len(conversation), 600):
+            part_summary = self.summarizer(conversation[i: min(i + 600, len(conversation))])[0]["summary_text"]
             summary += part_summary
 
         return summary

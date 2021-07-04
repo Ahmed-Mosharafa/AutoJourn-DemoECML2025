@@ -6,13 +6,13 @@ import pandas as pd
 class TopicModeling(ABC):
 
     @abstractmethod
-    def get_topics(self, docs):
+    def get_topics(self, docs, num_topics):
         """
         run topic modeling model to get the topics associated to each document in docs with optional
         topics assignments probabilities.
 
         :param docs: List[String]: list of documents input to the topic modeling model.
-        :return:
+        :param num_topics: Int: number of topics.
         """
         pass
 
@@ -80,13 +80,15 @@ class TopicModeling(ABC):
 
         return docs, tweet_conv_dict, processed_origin_tweet_dict
 
-    def run_tweet_topic_modeling(self, data):
+    def run_tweet_topic_modeling(self, data, num_topics=20):
         """
         Run topic modeling model on tweet conversations in SAMSum format. It treats each tweet as a document and
         determine a topic for each tweet. Then, we average the probabilities for all tweets associated to a single
         conversation to get the topic probabilities for each conversation.
 
         :param data: List[{conv_id:String -> tweets:[String]}]
+        :param num_topics: Int: number of topics.
+
         :return: <conv_topic_probs_df.to_json():String, topics_df.to_json():String>:
             1- conv_topic_probs_df: each row is for a conversation and each column represent a topic probability.
             2- topics_df: each row is a topic and its assigned name based on tf-idf (i.e., top terms
@@ -95,7 +97,7 @@ class TopicModeling(ABC):
 
         docs, tweet_conv_dict, processed_origin_tweet_dict = self.__flatten_tweets(data)  # each tweet is a document
 
-        topics_df, probs = self.get_topics(docs)
+        topics_df, probs = self.get_topics(docs, num_topics)
 
         conv_tweet_topic_prob_dict = {}
         for idx, tweet in enumerate(docs):
@@ -116,12 +118,14 @@ class TopicModeling(ABC):
         topics_id_name_dict = {row["Topic"]: row["Name"] for index, row in topics_df.iterrows()}
         return conv_topic_probs_dict, topics_id_name_dict
 
-    def run_con_topic_modeling(self, data):
+    def run_con_topic_modeling(self, data, num_topics=20):
         """
         Run topic modeling model on tweet conversations in SAMSum format. It treats each conversation as a document and
         determine a topic for each conversation.
 
         :param data: List[{conv_id:String -> tweets:[String]}]
+        :param num_topics: Int: number of topics.
+
         :return: <conv_topic_probs_df: DataFrame, topics_df DataFrame>:
             1- conv_topic_probs_df: each row is for a conversation and each column represent a topic probability.
             2- topics_df: each row is a topic and its assigned name based on tf-idf (i.e., top terms
@@ -129,7 +133,7 @@ class TopicModeling(ABC):
         """
 
         docs, doc_conv_dict = self.__merge_tweets(data)  # each conversation is a document
-        topics_df, probs = self.get_topics(docs)
+        topics_df, probs = self.get_topics(docs, num_topics)
 
         conv_topic_probs_dict = {}
         for idx, d in enumerate(docs):
