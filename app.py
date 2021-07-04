@@ -123,7 +123,8 @@ def handle_server_error(error):
 #
 #     with open('topics_idx.json', 'w') as outfile:
 #         json.dump(topics, outfile)
-#
+
+
 #     with open('summary.json', 'w') as summary_file:
 #         conv_summary_dict = summarizer.run(data[1:3])
 #         json.dump(conv_summary_dict, summary_file)
