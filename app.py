@@ -33,98 +33,102 @@ import json
 import logging
 
 # Initialize the application's components
-app = Flask('NLPLAB')
+# app = Flask('NLPLAB')
 config.init()
 api = TweetAPI()
-bertopic = Bertopic()
-summarizer = BartSummarizationModel()
+# bertopic = Bertopic()
+# summarizer = BartSummarizationModel()
 
-if __name__ != '__main__':
-    # App is being run externally (through gunicorn).
-    gunicorn_logger_access = logging.getLogger("gunicorn.access")
-    # Use the gunicorn logger as the app logger.
-    gunicorn_logger = logging.getLogger('gunicorn.error')
-    app.logger.handlers = gunicorn_logger.handlers
-    # Use the specified log level.
-    app.logger.setLevel(gunicorn_logger.level)
-
-
-@app.route('/search', methods=["GET"])
-def fetch_tweets():
-    query = request.args["query"]
-    response = api.get_conversations(search_keyword=query,
-                                     max_num_conv=config.Config.API_MAX_NUM_CONVERSATIONS,
-                                     max_num_pages=config.Config.API_MAX_NUM_PAGES,
-                                     max_page_res=config.Config.API_MAX_PAGE_NUM_RESULTS,
-                                     parse_func=api.parse_as_samsum_dataset)
-    return jsonify({"conversations": response})
-
-
-@app.route('/topics', methods=["GET"])
-def fetch_topics():
-    # return jsonify({"body": request.json, "num_topics": request.args["num_topics"]})
-    # print(request.form)
-    conversation_list = request.json["conversations"]
-    num_topics = int(request.args["num_topics"])
-
-    if config.Config.TOPIC_PER_TWEET:
-        conv_topic_probs, topics = bertopic.run_tweet_topic_modeling(conversation_list, num_topics=num_topics)
-    else:
-        conv_topic_probs, topics = bertopic.run_con_topic_modeling(conversation_list, num_topics=num_topics)
-
-    return jsonify({"topics": conv_topic_probs, "index_to_topic": topics})
-
-
-@app.route('/summarize', methods=["GET"])
-def fetch_summaries():
-    conversation_list = request.json["conversations"]
-    conv_summary_dict = summarizer.run(conversation_list)
-    return jsonify({"summaries": conv_summary_dict})
-
-
-@app.route('/health', methods=["GET"])
-def get_health_status():
-    """
-    API endpoint to check if the app has started running
-    :return: The health status of the app.
-    """
-    return jsonify({"status": "healthy"})
-
-
-# Error handlers
-@app.errorhandler(404)
-def handle_not_found(error):
-    return jsonify({"message": error.description}), 404
-
-
-@app.errorhandler(Exception)
-def handle_server_error(error):
-    return jsonify({"message": "Internal server error: {}".format(error)}), 500
-
-
-# if __name__ == '__main__':
-#     data = api.get_conversations(search_keyword="Egypt", max_num_conv=100, max_num_pages=50,
-#                                  max_page_res=100,
-#                                  parse_func=api.parse_as_samsum_dataset)
+# if __name__ != '__main__':
+#     # App is being run externally (through gunicorn).
+#     gunicorn_logger_access = logging.getLogger("gunicorn.access")
+#     # Use the gunicorn logger as the app logger.
+#     gunicorn_logger = logging.getLogger('gunicorn.error')
+#     app.logger.handlers = gunicorn_logger.handlers
+#     # Use the specified log level.
+#     app.logger.setLevel(gunicorn_logger.level)
 #
-#     with open('data.json', 'w') as outfile:
-#         json.dump(data, outfile)
 #
-#     # with open('res.json', 'r') as infile:
-#     #     data = json.load(infile)["conversations"]
+# @app.route('/search', methods=["GET"])
+# def fetch_tweets():
+#     query = request.args["query"]
+#     response = api.get_conversations(search_keyword=query,
+#                                      max_num_conv=config.Config.API_MAX_NUM_CONVERSATIONS,
+#                                      max_num_pages=config.Config.API_MAX_NUM_PAGES,
+#                                      max_page_res=config.Config.API_MAX_PAGE_NUM_RESULTS,
+#                                      parse_func=api.parse_as_samsum_dataset)
+#     return jsonify({"conversations": response})
+#
+#
+# @app.route('/topics', methods=["GET"])
+# def fetch_topics():
+#     # return jsonify({"body": request.json, "num_topics": request.args["num_topics"]})
+#     # print(request.form)
+#     conversation_list = request.json["conversations"]
+#     num_topics = int(request.args["num_topics"])
 #
 #     if config.Config.TOPIC_PER_TWEET:
-#         conv_topic_probs, topics = bertopic.run_tweet_topic_modeling(data, num_topics=10)
+#         conv_topic_probs, topics = bertopic.run_tweet_topic_modeling(conversation_list, num_topics=num_topics)
 #     else:
-#         conv_topic_probs, topics = bertopic.run_con_topic_modeling(data, num_topics=10)
+#         conv_topic_probs, topics = bertopic.run_con_topic_modeling(conversation_list, num_topics=num_topics)
 #
-#     with open('conv_topics.json', 'w') as outfile:
-#         json.dump(conv_topic_probs, outfile)
+#     return jsonify({"topics": conv_topic_probs, "index_to_topic": topics})
 #
-#     with open('topics_idx.json', 'w') as outfile:
-#         json.dump(topics, outfile)
+#
+# @app.route('/summarize', methods=["GET"])
+# def fetch_summaries():
+#     conversation_list = request.json["conversations"]
+#     conv_summary_dict = summarizer.run(conversation_list)
+#     return jsonify({"summaries": conv_summary_dict})
+#
+#
+# @app.route('/health', methods=["GET"])
+# def get_health_status():
+#     """
+#     API endpoint to check if the app has started running
+#     :return: The health status of the app.
+#     """
+#     return jsonify({"status": "healthy"})
+#
+#
+# # Error handlers
+# @app.errorhandler(404)
+# def handle_not_found(error):
+#     return jsonify({"message": error.description}), 404
+#
+#
+# @app.errorhandler(Exception)
+# def handle_server_error(error):
+#     return jsonify({"message": "Internal server error: {}".format(error)}), 500
 
 
-#     with open('summary.json', 'w') as summary_file:
-#         conv_summary_dict = summarizer.run(data[1:3])
-#         json.dump(conv_summary_dict, summary_file)
+if __name__ == '__main__':
+    data = api.get_conversations(search_keyword="Football", max_num_conv=100, max_num_pages=50,
+                                 max_page_res=100,
+                                 parse_func=api.parse_as_conv_hierarchy)
+
+    with open('data.json', 'w') as outfile:
+        json.dump(data, outfile)
+
+    # api.get_conversation("1412492799191261186", parse_func=api.parse_as_conv_hierarchy)
+
+    # with open('1412492799191261186.json', 'r') as infile:
+    #     data = json.load(infile)
+    #     res = api.parse_as_conv_hierarchy("1412492799191261186", data)
+    #     print(res)
+
+    # if config.Config.TOPIC_PER_TWEET:
+    #     conv_topic_probs, topics = bertopic.run_tweet_topic_modeling(data, num_topics=10)
+    # else:
+    #     conv_topic_probs, topics = bertopic.run_con_topic_modeling(data, num_topics=10)
+    #
+    # with open('conv_topics.json', 'w') as outfile:
+    #     json.dump(conv_topic_probs, outfile)
+    #
+    # with open('topics_idx.json', 'w') as outfile:
+    #     json.dump(topics, outfile)
+    #
+    #
+    # with open('summary.json', 'w') as summary_file:
+    #     conv_summary_dict = summarizer.run(data[1:3])
+    #     json.dump(conv_summary_dict, summary_file)
