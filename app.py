@@ -59,14 +59,12 @@ def fetch_tweets():
                                      parse_func=api.parse_as_samsum_dataset)
     return jsonify({"conversations": response})
 
-
-@app.route('/topics', methods=["GET"])
+@app.route('/topics', methods=["POST"])
 def fetch_topics():
     # return jsonify({"body": request.json, "num_topics": request.args["num_topics"]})
     # print(request.form)
     conversation_list = request.json["conversations"]
     num_topics = int(request.args["num_topics"])
-
     if config.Config.TOPIC_PER_TWEET:
         conv_topic_probs, topics = bertopic.run_tweet_topic_modeling(conversation_list, num_topics=num_topics)
     else:
@@ -74,13 +72,11 @@ def fetch_topics():
 
     return jsonify({"topics": conv_topic_probs, "index_to_topic": topics})
 
-
 @app.route('/summarize', methods=["GET"])
 def fetch_summaries():
     conversation_list = request.json["conversations"]
     conv_summary_dict = summarizer.run(conversation_list)
     return jsonify({"summaries": conv_summary_dict})
-
 
 @app.route('/health', methods=["GET"])
 def get_health_status():
@@ -90,6 +86,12 @@ def get_health_status():
     """
     return jsonify({"status": "healthy"})
 
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
+    return response
 
 # Error handlers
 @app.errorhandler(404)
