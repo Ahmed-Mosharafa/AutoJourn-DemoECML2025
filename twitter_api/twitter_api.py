@@ -3,6 +3,7 @@ import twitter_api.fields as fields
 import time
 import logging
 import config as config
+import json
 
 
 class TweetAPI:
@@ -98,12 +99,6 @@ class TweetAPI:
         resp = self.T.get(url, params=params)
         page = resp.json()
 
-        if "data" not in page:
-            print("No Data ===> ", page)
-
-        if "includes" not in page:
-            print("No includes ---> ", page)
-
         if ("data" not in page) or ("includes" not in page):  # tweet doesn't exist (maybe was deleted)
             return None
 
@@ -117,11 +112,6 @@ class TweetAPI:
         :param response: (dict): the response holding the tweets of a specific conversation
         :return: generator[dict]: a generator, dict for each paginated response.
         """
-        if "data" not in response:
-            print("No Data ===> ", response)
-
-        if "includes" not in response:
-            print("No includes ---> ", response)
 
         if ("data" not in response) or ("includes" not in response):  # No results
             return [None]
@@ -133,6 +123,20 @@ class TweetAPI:
             t["username"] = id_username_dict[t["author_id"]]
 
         return tweets
+
+    def __format_tweets_in_conv_hierarchy(self, root_tweet):
+        """
+        Given a the conversation tree, reformat tweets by removing unnecessary fields
+        :param root_tweet: conversation tree head which is a tweet and its children are direct replies
+        :return: conversation tree head: dict
+        """
+        new_tweet = {"created_at": root_tweet["created_at"], "username": root_tweet["username"],
+                     "lang": root_tweet["lang"], "text": root_tweet["text"], "replies": []}
+        if "replies" in root_tweet:  # check that the tweet as replies
+            for reply in root_tweet["replies"]:  # reformat children
+                new_tweet["replies"].append(self.__format_tweets_in_conv_hierarchy(reply))
+
+        return new_tweet
 
     def parse_as_conv_hierarchy(self, conv_id, tweets):
         """
@@ -155,11 +159,14 @@ class TweetAPI:
                     parent_tweet_id = ref["id"]
                     break
 
+            if parent_tweet_id not in id_tweet_dict:
+                continue
+
             parent_tweet_obj = id_tweet_dict[parent_tweet_id]
             if "replies" not in parent_tweet_obj:
                 parent_tweet_obj["replies"] = []
 
-            # add this tweet in the replies list of its parent tweeet.
+            # add this tweet in the replies list of its parent tweet.
             parent_tweet_obj["replies"].append(id_tweet_dict[t["id"]])
 
         # for each thread sort by created date
@@ -167,8 +174,10 @@ class TweetAPI:
             if "replies" in t:
                 t["replies"].sort(key=lambda x: x["created_at"])
 
-        return {conv_id: id_tweet_dict[conv_id]}  # return original tweet that started the conversation
+        root_tweet = id_tweet_dict[conv_id]  # original tweet that started the conversation
+        return {conv_id: self.__format_tweets_in_conv_hierarchy(root_tweet)}
 
+    @staticmethod
     def parse_as_samsum_dataset(self, conv_id, tweets):
         """
         Parse the conversation as in the SAMSum Dataset where each tweet is a line and preceeded by author name.
@@ -179,7 +188,7 @@ class TweetAPI:
             user1: Goodbye
             user2: Bye
         ""
-
+        :param conv_id: (String): id of the conversation.
         :param tweets: (generator[dict]): a generator, dict for each tweet.
         :return: list: list of tweets constructing the conversation.
         """
@@ -202,13 +211,18 @@ class TweetAPI:
         # query for search API to get tweets corresponding to specific conversation id
         query = "conversation_id:" + conv_id
 
-        tweets = [self.__get_tweet(conv_id)]  # get first (initiator) tweet
+        root_tweet = self.__get_tweet(conv_id)
+        if root_tweet is None:  # root tweet doesn't exist (was deleted or due to authorization error )
+            return None
+
+        tweets = [root_tweet]  # get first (initiator) tweet
         for response_page in self.__search_recent(query, max_results=max_results):  # get all tweets in the conversation
             tweets += self.__parse_response(response_page)
-            if len(response_page["data"]) < max_results:  # all tweets are fetched
-                break
+            # if len(response_page["data"]) < max_results:  # all tweets are fetched
+            #     break
 
         tweets = [t for t in tweets if t is not None]  # remove all Nones
+
         return parse_func(conv_id, tweets)
 
     def get_conversations(self, search_keyword, max_num_conv=10, max_num_pages=10,
@@ -228,8 +242,13 @@ class TweetAPI:
         conv_list = self.__collect_conversations_id(search_keyword, max_conv=max_num_conv, max_pages=max_num_pages,
                                                     max_page_results=max_page_res)
 
+        self.log.info("{} conversations are loaded".format(len(conv_list)))
         res = []
         for conv_id in conv_list:  # fetch tweets of each conversation
-            res.append(self.__get_conversation(conv_id=conv_id, max_results=max_page_res, parse_func=parse_func))
+            parsed_conv = self.__get_conversation(conv_id=conv_id, max_results=max_page_res, parse_func=parse_func)
+            if parsed_conv is None:
+                continue
+
+            res.append(parsed_conv)
 
         return res
