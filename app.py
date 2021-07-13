@@ -37,7 +37,7 @@ app = Flask('NLPLAB')
 config.init()
 api = TweetAPI()
 bertopic = Bertopic()
-summarizer = BartSummarizationModel()
+summarizer = BartSummarizationModel(config.Config.NUM_RANDOM_SAMPLES)
 
 if __name__ != '__main__':
     # App is being run externally (through gunicorn).
@@ -72,7 +72,7 @@ def fetch_topics():
 
     return jsonify({"topics": conv_topic_probs, "index_to_topic": topics})
 
-@app.route('/summarize', methods=["GET"])
+@app.route('/summarize', methods=["POST"])
 def fetch_summaries():
     conversation_list = request.json["conversations"]
     conv_summary_dict = summarizer.run(conversation_list)

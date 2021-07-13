@@ -15,6 +15,7 @@ class Config:
     API_MAX_NUM_CONVERSATIONS = 0
     API_MAX_NUM_PAGES = 0
     API_MAX_PAGE_NUM_RESULTS = 0
+    NUM_RANDOM_SAMPLES = 0
 
 
 config_vars = {config: t for config, t in vars(Config).items() if not config.startswith('__')}
