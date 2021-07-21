@@ -177,7 +177,6 @@ class TweetAPI:
         root_tweet = id_tweet_dict[conv_id]  # original tweet that started the conversation
         return {conv_id: self.__format_tweets_in_conv_hierarchy(root_tweet)}
 
-    @staticmethod
     def parse_as_samsum_dataset(self, conv_id, tweets):
         """
         Parse the conversation as in the SAMSum Dataset where each tweet is a line and preceeded by author name.

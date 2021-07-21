@@ -4,8 +4,9 @@ from summarization.summarization import Summarization
 import re
 
 class BartSummarizationModel(Summarization):
-    def __init__(self):
+    def __init__(self, num_random_samples):
         self.summarizer = pipeline("summarization", model="lidiya/bart-base-samsum")
+        self.num_random_samples = num_random_samples
 
     def preprocess(self, conversation):
         # Remove links
@@ -16,10 +17,7 @@ class BartSummarizationModel(Summarization):
         conversation = conversation.encode('UTF-16', 'surrogatepass').decode(encoding='UTF-16')
         return conversation
 
-    def summarize(self, conversation):
-        summary = ""
-        for i in range(0, len(conversation), 600):
-            part_summary = self.summarizer(conversation[i: min(i + 600, len(conversation))])[0]["summary_text"]
-            summary += part_summary
-
+    def summarize(self, tweets):
+        random_tweets = self.pick_random_tweets(tweets)
+        summary = self.summarizer("".join(random_tweets))[0]["summary_text"]
         return summary
