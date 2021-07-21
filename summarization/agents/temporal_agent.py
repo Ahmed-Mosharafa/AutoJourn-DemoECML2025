@@ -7,7 +7,7 @@ from summarization.models.summarizer import SummarizationModel
 
 class TemporalAgent(RandomizerAgent):
     def __init__(self, summarizer_model: SummarizationModel, time_bucket_len_sec: int):
-        super(RandomizerAgent).__init__(summarizer_model, sample_size=1)
+        super(TemporalAgent, self).__init__(summarizer_model, sample_size=1)
         self.time_bucket_len_sec = time_bucket_len_sec
 
     @staticmethod
@@ -43,9 +43,9 @@ class TemporalAgent(RandomizerAgent):
 
     def run_conv(self, conv_root: Dict) -> str:
         tweets_list = []
-        self.__flatten_tree(conv_root, tweets_list)
+        self._flatten_tree(conv_root, tweets_list)
         clusters = self.__time_bucketing_conv(tweets_list)
-        sampled_tweets = [self.__sample(temporal_cluster)[0] for temporal_cluster in clusters]
+        sampled_tweets = [self._sample(temporal_cluster)[0] for temporal_cluster in clusters]
         sampled_tweets = [tweet["username"] + ":" + tweet["text"] for tweet in sampled_tweets]
         summary = self.summarizer_model.summarize(sampled_tweets)
         return summary

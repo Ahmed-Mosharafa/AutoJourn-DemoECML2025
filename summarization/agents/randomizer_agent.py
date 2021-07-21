@@ -7,10 +7,10 @@ import random
 
 class RandomizerAgent(BaseAgent):
     def __init__(self, summarizer_model: SummarizationModel, sample_size: int):
-        super(BaseAgent).__init__(summarizer_model)
+        super(RandomizerAgent, self).__init__(summarizer_model)
         self.sample_size = sample_size
 
-    def __sample(self, tweets: List[Dict]) -> List[Dict]:
+    def _sample(self, tweets: List[Dict]) -> List[Dict]:
         idx_set = set([])
         while len(idx_set) < self.sample_size:
             rand_idx = random.randrange(len(tweets))
@@ -23,8 +23,8 @@ class RandomizerAgent(BaseAgent):
 
     def run_conv(self, conv_root: Dict) -> str:
         tweets_list = []
-        self.__flatten_tree(conv_root, tweets_list)
-        sampled_tweets = self.__sample(tweets_list)
+        self._flatten_tree(conv_root, tweets_list)
+        sampled_tweets = self._sample(tweets_list)
         sampled_tweets = [tweet["username"] + ":" + tweet["text"] for tweet in sampled_tweets]
         summary = self.summarizer_model.summarize(sampled_tweets)
         return summary

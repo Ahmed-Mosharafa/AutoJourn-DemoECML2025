@@ -6,7 +6,7 @@ from summarization.models.summarizer import SummarizationModel
 
 class MainThreadAgent(Agent):
     def __init__(self, summarizer_model: SummarizationModel):
-        super(Agent).__init__(summarizer_model)
+        super(MainThreadAgent, self).__init__(summarizer_model)
 
     @staticmethod
     def get_main_thread(conv_root: Dict) -> List[Dict]:

@@ -2,15 +2,18 @@ from transformers import pipeline, AutoTokenizer
 from typing import List
 
 from summarization.models.summarizer import SummarizationModel
-import nltk
 import re
+import logging
 
 
 class Bart(SummarizationModel):
     def __init__(self, model):
+        super(SummarizationModel, self).__init__()
         self._tokenizer = AutoTokenizer.from_pretrained(model)
         self.model = pipeline("summarization", model=model)
-        nltk.download('punkt')
+        logging.basicConfig(format='%(asctime)s :: %(levelname)s :: %(funcName)s :: %(lineno)d \
+        :: %(message)s', level=logging.INFO)
+        self.log = logging.getLogger("bart")
 
     def preprocess(self, tweet):
         # Remove links
@@ -62,10 +65,12 @@ class Bart(SummarizationModel):
         text_chunks = self.__chunk_conversation(conv_tweets_list)
         chunk_summaries = []
 
-        for chunk in text_chunks:
-            chunk_summary = self.model(chunk, min_length=int(0.1 * len(chunk)),
-                                       max_length=int(0.5 * len(chunk)))
+        for i, chunk in enumerate(text_chunks):
+            num_tokens = len(self._tokenizer.encode(chunk, truncation=False, max_length=None, return_tensors='pt')[0])
+            chunk_summary = self.model(chunk, min_length=int(0.1 * num_tokens),
+                                       max_length=int(0.5 * num_tokens))
             chunk_summaries.append(chunk_summary)
+            self.log.info("Summarized chuck number {}".format(i))
 
         chunks_summaries = [chunk_summary[0]["summary_text"] for chunk_summary in chunk_summaries]
         summary = ''.join(chunks_summaries)

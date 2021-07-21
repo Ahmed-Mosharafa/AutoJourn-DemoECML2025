@@ -5,7 +5,7 @@ Summarization models Interface
 """
 
 
-class SummarizationModel:
+class SummarizationModel(object):
 
     def preprocess(self, tweet: str) -> str:
         """

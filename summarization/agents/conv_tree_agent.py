@@ -6,7 +6,7 @@ from summarization.models.summarizer import SummarizationModel
 
 class ConvTreeAgent(Agent):
     def __init__(self, summarizer_model: SummarizationModel):
-        super(Agent).__init__(summarizer_model)
+        super(ConvTreeAgent, self).__init__(summarizer_model)
 
     def __dfs(self, root: dict) -> (str, str):
         text = root["text"]
