@@ -5,7 +5,7 @@ from summarization.agents.randomizer_agent import RandomizerAgent
 from summarization.models.summarizer import SummarizationModel
 
 
-class MainThreadAgent(RandomizerAgent):
+class TemporalAgent(RandomizerAgent):
     def __init__(self, summarizer_model: SummarizationModel, time_bucket_len_sec: int):
         super(RandomizerAgent).__init__(summarizer_model, sample_size=1)
         self.time_bucket_len_sec = time_bucket_len_sec

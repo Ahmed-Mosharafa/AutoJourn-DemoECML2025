@@ -3,7 +3,6 @@ import twitter_api.fields as fields
 import time
 import logging
 import config as config
-import json
 
 
 class TweetAPI:
