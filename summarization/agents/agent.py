@@ -1,8 +1,12 @@
 from abc import ABC, abstractmethod
 from typing import List, Dict
+from summarization.models.summarizer import SummarizationModel
 
 
 class Agent(ABC):
+
+    def __init__(self, summarizer_model: SummarizationModel):
+        self.summarizer_model = summarizer_model
 
     @abstractmethod
     def run_conv(self, conv_root: Dict) -> str:

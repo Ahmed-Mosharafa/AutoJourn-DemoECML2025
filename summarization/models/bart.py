@@ -1,12 +1,12 @@
 from transformers import pipeline, AutoTokenizer
 from typing import List
 
-from summarization.models.summarizer import SummarizationModelInterface
+from summarization.models.summarizer import SummarizationModel
 import nltk
 import re
 
 
-class Bart(SummarizationModelInterface):
+class Bart(SummarizationModel):
     def __init__(self, model):
         self._tokenizer = AutoTokenizer.from_pretrained(model)
         self.model = pipeline("summarization", model=model)
@@ -58,6 +58,7 @@ class Bart(SummarizationModelInterface):
         return chunks
 
     def summarize(self, conv_tweets_list):
+        conv_tweets_list = [self.preprocess(tweet) for tweet in conv_tweets_list]
         text_chunks = self.__chunk_conversation(conv_tweets_list)
         chunk_summaries = []
 
