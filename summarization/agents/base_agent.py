@@ -23,6 +23,7 @@ class BaseAgent(Agent):
     def run_conv(self, conv_root: Dict) -> str:
         tweets_list = []
         self.__flatten_tree(conv_root, tweets_list)
+        tweets_list.sort(key=lambda t: t["created_at"])  # sort tweets by date
         tweets_list = [tweet["username"] + ":" + tweet["text"] for tweet in tweets_list]
         summary = self.summarizer_model.summarize(tweets_list)
         return summary

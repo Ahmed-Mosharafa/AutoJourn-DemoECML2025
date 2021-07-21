@@ -8,7 +8,8 @@ class MainThreadAgent(Agent):
     def __init__(self, summarizer_model: SummarizationModel):
         super(Agent).__init__(summarizer_model)
 
-    def __get_main_thread(self, conv_root: Dict) -> List[Dict]:
+    @staticmethod
+    def get_main_thread(conv_root: Dict) -> List[Dict]:
         main_thread = [conv_root]
 
         # no replies to head tweet. The conversation is only one tweet
@@ -22,7 +23,7 @@ class MainThreadAgent(Agent):
         return main_thread
 
     def run_conv(self, conv_root: Dict) -> str:
-        main_thread = self.__get_main_thread(conv_root)
+        main_thread = self.get_main_thread(conv_root)
         tweets_list = [tweet["username"] + ":" + tweet["text"] for tweet in main_thread]
         summary = self.summarizer_model.summarize(tweets_list)
         return summary
