@@ -1,4 +1,4 @@
-from summarization.bartcnn import BartSummarizationModel
+from summarization.models.bart import BartSummarizationModel
 
 def test_remove_links():
     model = BartSummarizationModel()

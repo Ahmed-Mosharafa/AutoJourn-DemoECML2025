@@ -24,12 +24,11 @@
     - Response is a JSON Object of conversations summaries.
 """
 
-from summarization.bartcnn import BartSummarizationModel
+from summarization.models.bart import BartSummarizationModel
 from twitter_api.twitter_api import TweetAPI
 from topic_modeling.Bertopic import Bertopic
 from flask import Flask, request, jsonify
 import config
-import json
 import logging
 
 # Initialize the application's components
