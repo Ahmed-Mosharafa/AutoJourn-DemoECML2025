@@ -35,7 +35,7 @@ import logging
 # Initialize the application's components
 app = Flask('NLPLAB')
 config.init()
-# api = TweetAPI()
+api = TweetAPI()
 bertopic = Bertopic()
 summarizer_model = Bart(config.Config.SUMMARIZATION_MODEL)
 summarizer_agent = AgentsFactory.get_agent(summarizer_model)
@@ -109,8 +109,7 @@ def handle_not_found(error):
 def handle_server_error(error):
     return jsonify({"message": "Internal server error: {}".format(error)}), 500
 
-
-if __name__ == '__main__':
+    # if __name__ == '__main__':
     import json
 
     # data = api.get_conversations(search_keyword="Egypt", max_num_conv=100, max_num_pages=50,
@@ -120,8 +119,8 @@ if __name__ == '__main__':
     # with open('data.json', 'w') as outfile:
     #     json.dump(data, outfile)
 
-    with open("/home/hatem/TUM/Semester 4/Practical Lab/Football_qeury/data.json", 'r') as infile:
-        data = json.load(infile)
+    # with open("/home/hatem/TUM/Semester 4/Practical Lab/Football_qeury/data.json", 'r') as infile:
+    #     data = json.load(infile)
 
     # if config.Config.TOPIC_PER_TWEET:
     #     conv_topic_probs, topics = bertopic.run_tweet_topic_modeling(data, num_topics=10)
@@ -134,6 +133,6 @@ if __name__ == '__main__':
     # with open('topics_idx.json', 'w') as outfile:
     #     json.dump(topics, outfile)
 
-    with open('summary_base.json', 'w') as summary_file:
-        conv_summary_dict = summarizer_agent.run_all(data[1:3])
-        json.dump(conv_summary_dict, summary_file)
+    # with open('summary.json', 'w') as summary_file:
+    #     conv_summary_dict = summarizer_agent.run_all(data[0:1])
+    #     json.dump(conv_summary_dict, summary_file)

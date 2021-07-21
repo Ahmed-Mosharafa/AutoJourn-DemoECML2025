@@ -30,5 +30,5 @@ class AgentsFactory:
         if method == "base":
             return base_agent.BaseAgent(summarizer_model=summarizer_model)
 
-        raise NotImplemented("No summarization method with the name '{}'. \
-        Please use the defaults ones: tree, main_thread, random, temporal, base".format(method))
+        raise ModuleNotFoundError("No summarization method with the name: '" + method
+                                  + "' Please use the defaults ones: tree, main_thread, random, temporal, and base")
