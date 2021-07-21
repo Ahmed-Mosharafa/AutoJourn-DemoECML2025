@@ -20,7 +20,7 @@ class MainThreadAgent(RandomizerAgent):
         delta = dt2 - dt1
         return delta.total_seconds()
 
-    def __time_bucketizing_conv(self, tweets: List[dict]) -> List[List[Dict]]:
+    def __time_bucketing_conv(self, tweets: List[dict]) -> List[List[Dict]]:
         tweets.sort(key=lambda t: t["created_at"])  # sort tweets by date
         clusters = []
         idx = 0
@@ -44,7 +44,7 @@ class MainThreadAgent(RandomizerAgent):
     def run_conv(self, conv_root: Dict) -> str:
         tweets_list = []
         self.__flatten_tree(conv_root, tweets_list)
-        clusters = self.__time_bucketizing_conv(tweets_list)
+        clusters = self.__time_bucketing_conv(tweets_list)
         sampled_tweets = [self.__sample(temporal_cluster)[0] for temporal_cluster in clusters]
         sampled_tweets = [tweet["username"] + ":" + tweet["text"] for tweet in sampled_tweets]
         summary = self.summarizer_model.summarize(sampled_tweets)
