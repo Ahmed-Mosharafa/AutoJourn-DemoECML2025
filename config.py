@@ -4,18 +4,24 @@
 
 import json
 import os
-import twarc
 
 
 class Config:
-    # General config
+    # Twitter API config
     CONSUMER_KEY = ""
     CONSUMER_SECRET = ""
-    TOPIC_PER_TWEET = False
     API_MAX_NUM_CONVERSATIONS = 0
     API_MAX_NUM_PAGES = 0
     API_MAX_PAGE_NUM_RESULTS = 0
-    NUM_RANDOM_SAMPLES = 0
+
+    # Topic Modeling config
+    TOPIC_PER_TWEET = False  # boolean for performing topic modeling on tweet level
+
+    # Text Summarization config
+    NUM_RANDOM_SAMPLES = 0  # size of sample from randomizer agent
+    CONV_SUMMARIZER_METHOD = ''  # implemented methods: tree, main_thread, random, temporal, base
+    TIME_BUCKET_LEN_SEC = 0  # time bucket length for temporal agent summarizer
+    SUMMARIZATION_MODEL = ''  # summarization model from hugging-face
 
 
 config_vars = {config: t for config, t in vars(Config).items() if not config.startswith('__')}
