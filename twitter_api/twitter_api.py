@@ -213,13 +213,16 @@ class TweetAPI:
         if root_tweet is None:  # root tweet doesn't exist (was deleted or due to authorization error )
             return None
 
+        # ignore conversation with head tweet not written in English
+        if "lang" in root_tweet and root_tweet["lang"] != "en":
+            return None
+
         tweets = [root_tweet]  # get first (initiator) tweet
         for response_page in self.__search_recent(query, max_results=max_results):  # get all tweets in the conversation
             tweets += self.__parse_response(response_page)
-            # if len(response_page["data"]) < max_results:  # all tweets are fetched
-            #     break
 
         tweets = [t for t in tweets if t is not None]  # remove all Nones
+        tweets = [t for t in tweets if "lang" in t and t["lang"] == "en"]  # remove non-English tweets
 
         return parse_func(conv_id, tweets)
 
