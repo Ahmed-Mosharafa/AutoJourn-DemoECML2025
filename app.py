@@ -109,30 +109,31 @@ def handle_not_found(error):
 def handle_server_error(error):
     return jsonify({"message": "Internal server error: {}".format(error)}), 500
 
-    # if __name__ == '__main__':
-    import json
 
-    # data = api.get_conversations(search_keyword="Egypt", max_num_conv=100, max_num_pages=50,
-    #                              max_page_res=100,
-    #                              parse_func=api.parse_as_samsum_dataset)
-
-    # with open('data.json', 'w') as outfile:
-    #     json.dump(data, outfile)
-
-    # with open("/home/hatem/TUM/Semester 4/Practical Lab/Football_qeury/data.json", 'r') as infile:
-    #     data = json.load(infile)
-
-    # if config.Config.TOPIC_PER_TWEET:
-    #     conv_topic_probs, topics = bertopic.run_tweet_topic_modeling(data, num_topics=10)
-    # else:
-    #     conv_topic_probs, topics = bertopic.run_con_topic_modeling(data, num_topics=10)
-
-    # with open('conv_topics.json', 'w') as outfile:
-    #     json.dump(conv_topic_probs, outfile)
-    #
-    # with open('topics_idx.json', 'w') as outfile:
-    #     json.dump(topics, outfile)
-
-    # with open('summary.json', 'w') as summary_file:
-    #     conv_summary_dict = summarizer_agent.run_all(data[0:1])
-    #     json.dump(conv_summary_dict, summary_file)
+# if __name__ == '__main__':
+#     import json
+#
+#     data = api.get_conversations(search_keyword="Euro", max_num_conv=100, max_num_pages=50,
+#                                  max_page_res=100,
+#                                  parse_func=api.parse_as_conv_hierarchy)
+#
+#     with open('data.json', 'w') as outfile:
+#         json.dump(data, outfile)
+#
+#     with open("/home/hatem/TUM/Semester 4/Practical Lab/Football_qeury/data.json", 'r') as infile:
+#         data = json.load(infile)
+#
+#     if config.Config.TOPIC_PER_TWEET:
+#         conv_topic_probs, topics = bertopic.run_tweet_topic_modeling(data, num_topics=10)
+#     else:
+#         conv_topic_probs, topics = bertopic.run_con_topic_modeling(data, num_topics=10)
+#
+#     with open('conv_topics.json', 'w') as outfile:
+#         json.dump(conv_topic_probs, outfile)
+#
+#     with open('topics_idx.json', 'w') as outfile:
+#         json.dump(topics, outfile)
+#
+#     with open('summary.json', 'w') as summary_file:
+#         conv_summary_dict = summarizer_agent.run_all(data[0:1])
+#         json.dump(conv_summary_dict, summary_file)
