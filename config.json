@@ -8,6 +8,6 @@
   "NUM_RANDOM_SAMPLES": 6,
   "CONV_SUMMARIZER_METHOD": "main_thread",
   "TIME_BUCKET_LEN_SEC": 1800,
-  "SUMMARIZATION_MODEL": "lidiya/bart-base-samsum"
+  "SUMMARIZATION_MODEL": "philschmid/bart-large-cnn-samsum"
 }
 
