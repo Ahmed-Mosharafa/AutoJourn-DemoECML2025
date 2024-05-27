@@ -26,7 +26,7 @@
 
 from summarization.models.bart import Bart
 from summarization.agents.agent_factory import AgentsFactory
-from twitter_api.twitter_api import TweetAPI
+from api_connection.twitter_api.twitter_api import TweetAPI
 from topic_modeling.Bertopic import Bertopic
 from flask import Flask, request, jsonify
 import config
@@ -68,9 +68,11 @@ def fetch_topics():
     conversation_list = request.json["conversations"]
     num_topics = int(request.args["num_topics"])
     if config.Config.TOPIC_PER_TWEET:
-        conv_topic_probs, topics = bertopic.run_tweet_topic_modeling(conversation_list, num_topics=num_topics)
+        conv_topic_probs, topics = bertopic.run_tweet_topic_modeling(
+            conversation_list, num_topics=num_topics)
     else:
-        conv_topic_probs, topics = bertopic.run_con_topic_modeling(conversation_list, num_topics=num_topics)
+        conv_topic_probs, topics = bertopic.run_con_topic_modeling(
+            conversation_list, num_topics=num_topics)
 
     return jsonify({"topics": conv_topic_probs, "index_to_topic": topics})
 
@@ -94,7 +96,8 @@ def get_health_status():
 @app.after_request
 def after_request(response):
     response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Headers',
+                         'Content-Type,Authorization')
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
     return response
 
