@@ -1,7 +1,9 @@
 from telethon import TelegramClient
 from telethon import functions, types
-import telethon.sync
 import asyncio
+# from summarization.models.samsum import Samsum
+from samsum import Samsum
+import json
 
 
 class TelegramAPI:
@@ -23,19 +25,20 @@ class TelegramAPI:
 
             for channel in channels:
                 messages = await self.get_messages_from_channel(channel.title, message_limit)
-                query_result.append(messages)
+                query_result.extend(messages)
 
             return query_result
 
     async def start_app(self) -> None:
         await self.client.start()
 
+        passkey = "51314"
         phone = "+491623761600"
 
         if not await self.client.is_user_authorized():
             await self.client.send_code_request(phone)
         try:
-            await self.client.sign_in(phone, input('Enter the code: '))
+            await self.client.sign_in(phone, passkey)
         except Exception as e:
             await self.client.sign_in(password=input('Password: '))
 
@@ -60,13 +63,36 @@ class TelegramAPI:
 
         return channels
 
-    def transform_into_samsum(self, messages):
-        pass
+    def parse_all_messages(self, messages: list[types.Message]) -> list[Samsum]:
+        samsums = []
+        for message in messages:
+            samsums.append(self.parse_message(message))
+        return samsums
+
+    def parse_message(self, message: types.Message) -> Samsum:
+        try:
+            return Samsum(message.id, "", message.text)
+        except Exception as e:
+            print(e)
+            return Samsum(message.id, "", "")
+
+    def parse_message_json(self, message: types.Message) -> dict:
+        return self.parse_message(message).to_json()
+
+    def parse_all_messages_json(self, messages: list[types.Message]) -> list[dict]:
+        return [self.parse_message_json(message) for message in messages]
 
 
 def main():
     tapi = TelegramAPI("20866665", "9efc05b1e5d0aa89fa195326deff987b")
-    tapi.query("python")
+    result = tapi.query("türkiye")
+    sumsum = tapi.parse_all_messages_json(result)
+
+    def export_to_json(data, filename):
+        with open(filename, 'w', encoding='utf-8') as file:
+            json.dump(data, file, ensure_ascii=False)
+
+    export_to_json(sumsum, 'first_results_telegram_api.json')
 
 
 if __name__ == "__main__":
