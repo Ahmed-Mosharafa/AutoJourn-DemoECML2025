@@ -4,6 +4,7 @@ import asyncio
 # from summarization.models.samsum import Samsum
 from samsum import Samsum
 import json
+from message_thread import MessageThread
 
 
 class TelegramAPI:
@@ -12,12 +13,12 @@ class TelegramAPI:
         self.api_hash = api_hash
         self.client = TelegramClient('nlp_user', self.api_id, self.api_hash)
 
-    def query(self, query: str, channel_limit=5, message_limit=10) -> list[list[types.Message]]:
+    def query(self, query: str, channel_limit=5, message_limit=10) -> list[MessageThread]:
         result = asyncio.run(self.query_async(
             query, channel_limit, message_limit))
         return result
 
-    async def query_async(self, query: str, channel_limit=5, message_limit=10) -> list[list[types.Message]]:
+    async def query_async(self, query: str, channel_limit=5, message_limit=10) -> list[MessageThread]:
         async with self.client:
             await self.start_app()
             channels = await self.search_channels(query, channel_limit)
@@ -25,7 +26,8 @@ class TelegramAPI:
 
             for channel in channels:
                 messages = await self.get_messages_from_channel(channel.title, message_limit)
-                query_result.extend(messages)
+                message_thread = MessageThread(channel.id, messages)
+                query_result.append(message_thread)
 
             return query_result
 
@@ -63,29 +65,41 @@ class TelegramAPI:
 
         return channels
 
-    def parse_all_messages(self, messages: list[types.Message]) -> list[Samsum]:
+    def parse_all_messages(self, message_threads: list[MessageThread]) -> list[Samsum]:
         samsums = []
-        for message in messages:
-            samsums.append(self.parse_message(message))
+        for message_thread in message_threads:
+            samsums.append(self.parse_message(
+                message_thread.messages, message_thread.id))
         return samsums
 
-    def parse_message(self, message: types.Message) -> Samsum:
-        try:
-            return Samsum(message.id, "", message.text)
-        except Exception as e:
-            print(e)
-            return Samsum(message.id, "", "")
+    def parse_message(self, messages: list[types.Message], id) -> Samsum:
+        samsum = Samsum(id, "", "")
+        for message in messages:
+            try:
+                samsum.add_dialogue(message.sender_id, message.text)
+            except Exception as e:
+                print(e)
 
-    def parse_message_json(self, message: types.Message) -> dict:
-        return self.parse_message(message).to_json()
+        return samsum
 
-    def parse_all_messages_json(self, messages: list[types.Message]) -> list[dict]:
-        return [self.parse_message_json(message) for message in messages]
+    def parse_message_json(self, messages: list[types.Message], id) -> dict:
+        return self.parse_message(messages, id).to_json()
+
+    def parse_all_messages_json(self, message_threads: list[MessageThread]) -> list[dict]:
+        return [self.parse_message_json(messages=message_thread.messages, id=message_thread.id) for message_thread in message_threads]
+
+    # for testing purposes
+
+    def export_query_as_json(self, query: str, channel_limit=5, message_limit=10, filename="results.json") -> None:
+        result = self.query(query, channel_limit, message_limit)
+        with open(filename, 'w', encoding='utf-8') as file:
+            json.dump(self.parse_all_messages_json(
+                result), file, ensure_ascii=False)
 
 
 def main():
     tapi = TelegramAPI("20866665", "9efc05b1e5d0aa89fa195326deff987b")
-    result = tapi.query("türkiye")
+    result = tapi.query("football")
     sumsum = tapi.parse_all_messages_json(result)
 
     def export_to_json(data, filename):
