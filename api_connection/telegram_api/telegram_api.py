@@ -22,6 +22,7 @@ class TelegramAPI:
 
     async def query_async(self, query: str, channel_limit=5, message_limit=10) -> list[MessageThread]:
         async with self.client:
+            await self.start_app()
             channels = await self.search_channels(query, channel_limit)
             query_result = []
 
@@ -31,6 +32,19 @@ class TelegramAPI:
                 query_result.append(message_thread)
 
             return query_result
+
+    async def start_app(self) -> None:
+        await self.client.start()
+
+        passkey = config.Config.TELEGRAM_PASSWORD
+        phone = config.Config.TELEGRAM_PHONE_NUMBER
+
+        if not await self.client.is_user_authorized():
+            await self.client.send_code_request(phone)
+        try:
+            await self.client.sign_in(phone, passkey)
+        except Exception as e:
+            await self.client.sign_in(password=input('Password: '))
 
     async def get_messages_from_channel(self, channel_name: str, limit=10) -> list[types.Message]:
         messages = []
