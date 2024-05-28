@@ -44,6 +44,7 @@ scipy==1.6.3
 sentence-transformers==1.2.0
 sentencepiece==0.1.95
 six==1.16.0
+Telethon==1.35.0
 threadpoolctl==2.1.0
 tokenizers==0.10.3
 torch==1.8.1

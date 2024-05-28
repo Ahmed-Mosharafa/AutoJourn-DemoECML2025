@@ -19,12 +19,22 @@ class Config:
 
     # Text Summarization config
     NUM_RANDOM_SAMPLES = 0  # size of sample from randomizer agent
-    CONV_SUMMARIZER_METHOD = ''  # implemented methods: tree, main_thread, random, temporal, base
+    # implemented methods: tree, main_thread, random, temporal, base
+    CONV_SUMMARIZER_METHOD = ''
     TIME_BUCKET_LEN_SEC = 0  # time bucket length for temporal agent summarizer
     SUMMARIZATION_MODEL = ''  # summarization model from hugging-face
 
+    # Telegram API config
+    TELEGRAM_API_ID = ""
+    TELEGRAM_API_HASH = ""
+    MAX_NUM_OF_TELEGRAM_CHANNELS = 0
+    MAX_NUM_OF_TELEGRAM_MESSAGES_PER_CHANNEL = 0
+    TELEGRAM_PHONE_NUMBER = ""
+    TELEGRAM_PASSWORD = ""
 
-config_vars = {config: t for config, t in vars(Config).items() if not config.startswith('__')}
+
+config_vars = {config: t for config, t in vars(
+    Config).items() if not config.startswith('__')}
 
 
 def _read_config(source):
@@ -36,7 +46,8 @@ def _read_config(source):
     for config, default in config_vars.items():
         t = type(default)
         if config in source:
-            result[config] = t(source[config]) if t is not bool else str(source[config]).lower() == 'true'
+            result[config] = t(source[config]) if t is not bool else str(
+                source[config]).lower() == 'true'
 
     return result
 
@@ -68,7 +79,8 @@ def _get_config(config, *stages):
 
 def init():
     file_config = _get_file_config()  # read configuration from file
-    env_config = _get_env_config()  # read configurations from environment (env variables)
+    # read configurations from environment (env variables)
+    env_config = _get_env_config()
 
     # Define configurations as stages in the order of most priority (e.g., env variables has top priority)
     stages = env_config, file_config
