@@ -24,9 +24,11 @@
     - Response is a JSON Object of conversations summaries.
 """
 
+import json
 from summarization.models.bart import Bart
 from summarization.agents.agent_factory import AgentsFactory
-from twitter_api.twitter_api import TweetAPI
+#from twitter_api.twitter_api import TweetAPI
+from topic_aware_sum import get_similarity_matrix
 from topic_modeling.Bertopic import Bertopic
 from flask import Flask, request, jsonify
 import config
@@ -35,12 +37,14 @@ import logging
 # Initialize the application's components
 app = Flask('NLPLAB')
 config.init()
-api = TweetAPI()
+#api = TweetAPI()
 bertopic = Bertopic()
 summarizer_model = Bart(config.Config.SUMMARIZATION_MODEL)
 summarizer_agent = AgentsFactory.get_agent(summarizer_model)
 
+
 if __name__ != '__main__':
+    print("buraya geldi")
     # App is being run externally (through gunicorn).
     gunicorn_logger_access = logging.getLogger("gunicorn.access")
     # Use the gunicorn logger as the app logger.
@@ -51,36 +55,51 @@ if __name__ != '__main__':
 
 
 @app.route('/search', methods=["GET"])
-def fetch_tweets():
-    query = request.args["query"]
-    response = api.get_conversations(search_keyword=query,
-                                     max_num_conv=config.Config.API_MAX_NUM_CONVERSATIONS,
-                                     max_num_pages=config.Config.API_MAX_NUM_PAGES,
-                                     max_page_res=config.Config.API_MAX_PAGE_NUM_RESULTS,
-                                     parse_func=api.parse_as_conv_hierarchy)
-    return jsonify({"conversations": response})
+def fetch_conversations():
+    # Load conversations from a local JSON file
+    with open('dataset/test.json', 'r') as infile:  # Replace with your dataset path
+        conversations = json.load(infile)
+    return jsonify({"conversations": conversations})
 
 
 @app.route('/topics', methods=["POST"])
 def fetch_topics():
     # return jsonify({"body": request.json, "num_topics": request.args["num_topics"]})
     # print(request.form)
+    print(1)
     conversation_list = request.json["conversations"]
+    print(2)
     num_topics = int(request.args["num_topics"])
+    print(3)
     if config.Config.TOPIC_PER_TWEET:
+        print(4)
         conv_topic_probs, topics = bertopic.run_tweet_topic_modeling(conversation_list, num_topics=num_topics)
+        print(5)
     else:
+        print(6)
         conv_topic_probs, topics = bertopic.run_con_topic_modeling(conversation_list, num_topics=num_topics)
+        print(7)
 
     return jsonify({"topics": conv_topic_probs, "index_to_topic": topics})
 
 
 @app.route('/summarize', methods=["POST"])
 def fetch_summaries():
+    print(1)
     conversation_list = request.json["conversations"]
+    print(2)
     conv_summary_dict = summarizer_agent.run_all(conversation_list)
+    print(3)
     return jsonify({"summaries": conv_summary_dict})
 
+
+
+
+@app.route('/bart-summarize', methods=["POST"])
+def bart_summarize():
+    dict_topic_sentences = get_similarity_matrix(request.json["conversations"][0]['dialogue'])
+    print(dict_topic_sentences)
+    return jsonify({"dict_topic_sentences": dict_topic_sentences})
 
 @app.route('/health', methods=["GET"])
 def get_health_status():
