@@ -1,6 +1,7 @@
 from topic_modeling.topic_modeling import TopicModeling
 from bertopic import BERTopic
 from umap import UMAP
+from sentence_transformers import SentenceTransformer
 import re
 import numpy as np
 
@@ -20,19 +21,20 @@ class Bertopic(TopicModeling):
                           n_components=5,
                           min_dist=0.0,
                           metric='cosine')
-
+        sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
         self.model = BERTopic(nr_topics=None,
                               language="multilingual",  # Use multilingual sentence-tranformers embedding model
                               top_n_words=5,
                               calculate_probabilities=True,
                               verbose=True,
                               n_gram_range=(1, 1),
-                              umap_model=umap_model)
+                              umap_model=umap_model,
+                              embedding_model=sentence_model)
 
     def get_topics(self, docs, num_topics):
         topics, probs = self.model.fit_transform(docs)  # fit the model to compute the topics
         # reduce the number of topics to self.num_topics
-        _, new_probs = self.model.reduce_topics(docs, topics, probabilities=probs, nr_topics=num_topics)
+        self.model.reduce_topics(docs, nr_topics=num_topics)
         # topic_df which hold in each row the topic number and name
         topics_df = self.model.get_topic_info()
         # remove outlier topic which has topic number = -1

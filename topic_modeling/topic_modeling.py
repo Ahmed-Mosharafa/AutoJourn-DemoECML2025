@@ -37,7 +37,9 @@ class TopicModeling(ABC):
         doc_conv_dict = {}  # Map each processed document to its conversation
         docs = []
         for conv_dict in data:
-            conv_id, conv = next(iter(conv_dict.items()))  # each conv dictionary has one item {conv_id: [tweets]}
+            # conv_id, conv = next(iter(conv_dict.items()))  # each conv dictionary has one item {conv_id: [tweets]}
+            conv_id = conv_dict['id']
+            conv = conv_dict['dialogue'].split("\n")
             processed_conv = []
             for tweet in conv:
                 processed_conv.append(self.preprocess(tweet))
@@ -65,7 +67,9 @@ class TopicModeling(ABC):
         processed_origin_tweet_dict = {}  # map processed tweet to original one
         docs = []
         for conv_dict in data:
-            conv_id, conv = next(iter(conv_dict.items()))  # each conv dictionary has one item {conv_id: [tweets]}
+            # conv_id, conv = next(iter(conv_dict.items()))  # each conv dictionary has one item {conv_id: [tweets]}
+            conv_id = conv_dict['id']
+            conv = conv_dict['dialogue'].split("\n")
             for tweet in conv:
                 tweet_conv_dict[tweet] = conv_id
                 t_tweet = self.preprocess(tweet)
@@ -96,7 +100,6 @@ class TopicModeling(ABC):
         """
 
         docs, tweet_conv_dict, processed_origin_tweet_dict = self.__flatten_tweets(data)  # each tweet is a document
-
         topics_df, probs = self.get_topics(docs, num_topics)
 
         conv_tweet_topic_prob_dict = {}
