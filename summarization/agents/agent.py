@@ -18,7 +18,7 @@ class Agent(ABC):
         print(5)
         for conv_dict in conv_list:
             conv_root = list(conv_dict.items())[0][1]
-            conv_id = list(conv_dict.items())[1][1]
+            conv_id = 1#list(conv_dict.items())[1][1]
 
             #conv_root, conv_id = next(iter(conv_dict.items()))
             conv_summary = self.run_conv(conv_root)

@@ -28,7 +28,7 @@ import json
 from summarization.models.bart import Bart
 from summarization.agents.agent_factory import AgentsFactory
 #from twitter_api.twitter_api import TweetAPI
-from topic_aware_sum import get_similarity_matrix
+from topic_aware_sum import TopicAwareSummarization
 from topic_modeling.Bertopic import Bertopic
 from flask import Flask, request, jsonify
 import config
@@ -41,6 +41,7 @@ config.init()
 bertopic = Bertopic()
 summarizer_model = Bart(config.Config.SUMMARIZATION_MODEL)
 summarizer_agent = AgentsFactory.get_agent(summarizer_model)
+topic_aware_summarizer = TopicAwareSummarization()
 
 
 if __name__ != '__main__':
@@ -97,7 +98,11 @@ def fetch_summaries():
 
 @app.route('/bart-summarize', methods=["POST"])
 def bart_summarize():
-    dict_topic_sentences = get_similarity_matrix(request.json["conversations"][0]['dialogue'])
+    conversation_list = request.json["conversations"]
+    dialogue_sentences = request.json["conversations"][0]
+    topics_df, topic_embeddings = bertopic.get_topic_embeddings(conversation_list)
+    dict_topic_sentences, conv_id = topic_aware_summarizer.extract_topic_sentences(dialogue_sentences, topics_df, topic_embeddings)
+    summarizer_agent.run_all([dict_topic_sentences])
     print(dict_topic_sentences)
     return jsonify({"dict_topic_sentences": dict_topic_sentences})
 
