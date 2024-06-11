@@ -26,7 +26,8 @@
 
 from summarization.models.bart import Bart
 from summarization.agents.agent_factory import AgentsFactory
-from twitter_api.twitter_api import TweetAPI
+from api_connection.twitter_api.twitter_api import TweetAPI
+from api_connection.telegram_api.telegram_api import TelegramAPI
 from topic_modeling.Bertopic import Bertopic
 from flask import Flask, request, jsonify
 import config
@@ -36,6 +37,7 @@ import logging
 app = Flask('NLPLAB')
 config.init()
 api = TweetAPI()
+tele_api = TelegramAPI()
 bertopic = Bertopic()
 summarizer_model = Bart(config.Config.SUMMARIZATION_MODEL)
 summarizer_agent = AgentsFactory.get_agent(summarizer_model)
@@ -48,6 +50,14 @@ if __name__ != '__main__':
     app.logger.handlers = gunicorn_logger.handlers
     # Use the specified log level.
     app.logger.setLevel(gunicorn_logger.level)
+
+
+@app.route('/search-telegram', methods=["GET"])
+def fetch_telegram():
+    query = request.args["query"]
+    response = tele_api.get_conversations(query, channel_limit=config.Config.MAX_NUM_OF_TELEGRAM_CHANNELS,
+                                          message_limit=config.Config.MAX_NUM_OF_TELEGRAM_MESSAGES_PER_CHANNEL)
+    return jsonify({"conversations": response})
 
 
 @app.route('/search', methods=["GET"])
@@ -68,9 +78,11 @@ def fetch_topics():
     conversation_list = request.json["conversations"]
     num_topics = int(request.args["num_topics"])
     if config.Config.TOPIC_PER_TWEET:
-        conv_topic_probs, topics = bertopic.run_tweet_topic_modeling(conversation_list, num_topics=num_topics)
+        conv_topic_probs, topics = bertopic.run_tweet_topic_modeling(
+            conversation_list, num_topics=num_topics)
     else:
-        conv_topic_probs, topics = bertopic.run_con_topic_modeling(conversation_list, num_topics=num_topics)
+        conv_topic_probs, topics = bertopic.run_con_topic_modeling(
+            conversation_list, num_topics=num_topics)
 
     return jsonify({"topics": conv_topic_probs, "index_to_topic": topics})
 
@@ -94,7 +106,8 @@ def get_health_status():
 @app.after_request
 def after_request(response):
     response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Headers',
+                         'Content-Type,Authorization')
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
     return response
 

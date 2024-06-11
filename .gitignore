@@ -112,6 +112,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+config.json
+nlp_user.session
 
 # Spyder project settings
 .spyderproject
