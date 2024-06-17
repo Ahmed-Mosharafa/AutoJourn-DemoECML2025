@@ -23,6 +23,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Feed />} />
             <Route path="/feed" element={<Feed />} />
+            <Route path="/search" element={<Feed isSearch={true}/>} />
             <Route path="/summary" element={<Summary />} />
             <Route path="/settings" element={<Settings />} />
           </Routes>

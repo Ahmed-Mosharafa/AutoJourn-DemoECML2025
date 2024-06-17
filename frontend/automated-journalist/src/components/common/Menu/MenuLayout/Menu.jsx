@@ -11,7 +11,11 @@ export function Menu() {
   return (
     <div className="menu-div">
       <MenuItem icon={homeIcon} text="Home" onClick={() => navigate("/feed")} />
-      <MenuItem icon={searchIcon} text="Search" />
+      <MenuItem
+        icon={searchIcon}
+        text="Search"
+        onClick={() => navigate("/search")}
+      />
       <MenuItem
         icon={settingsIcon}
         text="Settings"
