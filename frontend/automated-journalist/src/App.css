@@ -43,11 +43,6 @@
   height: 100%;
 }
 
-.center-layout {
-  position: absolute;
-  left: 22vw;
-}
-
 .right-layout {
   position: absolute;
   right: 4vw;
