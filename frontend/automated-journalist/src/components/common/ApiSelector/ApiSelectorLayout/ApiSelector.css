@@ -1,0 +1,13 @@
+.api-selector-container {
+  display: flex;
+  padding-right: 20px;
+  padding-top: 3.5vh;
+  gap: 5vw;
+  font-size: 28px;
+  color: #c0c0c0;
+  font-weight: 600;
+  white-space: nowrap;
+  letter-spacing: -0.56px;
+  line-height: 110%;
+  justify-content: space-between;
+}

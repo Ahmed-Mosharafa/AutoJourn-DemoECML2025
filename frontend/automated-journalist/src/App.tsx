@@ -1,25 +1,35 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import "./App.css";
+import { Feed } from "./components/Feed/Feed";
+import { Logo } from "./components/common/Logo/Logo";
+import { Menu } from "./components/common/Menu/MenuLayout/Menu";
+import { ApiSelector } from "./components/common/ApiSelector/ApiSelectorLayout/ApiSelector";
+import { HotTopics } from "./components/common/HotTopics/HotTopicsLayout/HotTopics";
+import { Summary } from "./components/Summary/Summary";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <div className="left-layout">
+        <Logo />
+        <Menu />
+      </div>
+      <div className="center-layout">
+        <ApiSelector />
+      </div>
+      <div className="right-layout">
+        <HotTopics />
+      </div>
+      <div className="content">
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Feed />} />
+            <Route path="/feed" element={<Feed />} />
+            <Route path="/summary" element={<Summary />} />
+          </Routes>
+        </BrowserRouter>
+      </div>
+    </>
   );
 }
 

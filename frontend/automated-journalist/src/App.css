@@ -36,3 +36,26 @@
     transform: rotate(360deg);
   }
 }
+
+.left-layout {
+  position: absolute;
+  width: 19vw;
+  height: 100%;
+}
+
+.center-layout {
+  position: absolute;
+  left: 22vw;
+}
+
+.right-layout {
+  position: absolute;
+  right: 4vw;
+  top: 10vh;
+}
+
+.content {
+  position: absolute;
+  left: 22vw;
+  top: 13vh;
+}
