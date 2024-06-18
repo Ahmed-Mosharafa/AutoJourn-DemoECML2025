@@ -111,6 +111,11 @@ def topic_aware_summarize():
     return jsonify({"conv_summaries": conv_summaries})
 
 
+@app.route('/delta-summarize', methods=["POST"])
+def delta_summarize():
+    summaries = request.json["summaries"]
+
+
 @app.route('/health', methods=["GET"])
 def get_health_status():
     """
@@ -138,7 +143,6 @@ def handle_not_found(error):
 @app.errorhandler(Exception)
 def handle_server_error(error):
     return jsonify({"message": "Internal server error: {}".format(error)}), 500
-
 
 # if __name__ == '__main__':
 #     import json
