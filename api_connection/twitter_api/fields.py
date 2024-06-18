@@ -66,7 +66,8 @@ MEDIA_FIELDS = [
     "public_metrics",
 ]
 
-POLL_FIELDS = ["duration_minutes", "end_datetime", "id", "options", "voting_status"]
+POLL_FIELDS = ["duration_minutes", "end_datetime",
+               "id", "options", "voting_status"]
 
 PLACE_FIELDS = [
     "contained_within",

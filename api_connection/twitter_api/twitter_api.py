@@ -1,5 +1,5 @@
 import twarc
-import twitter_api.fields as fields
+import api_connection.twitter_api.fields as fields
 import time
 import logging
 import config as config
@@ -8,7 +8,8 @@ import config as config
 class TweetAPI:
 
     def __init__(self):
-        self.T = twarc.Twarc2(consumer_key=config.Config.CONSUMER_KEY, consumer_secret=config.Config.CONSUMER_SECRET)
+        self.T = twarc.Twarc2(consumer_key=config.Config.CONSUMER_KEY,
+                              consumer_secret=config.Config.CONSUMER_SECRET)
         logging.basicConfig(format='%(asctime)s :: %(levelname)s :: %(funcName)s :: %(lineno)d \
         :: %(message)s', level=logging.INFO)
         self.log = logging.getLogger("TweetAPI")
@@ -98,7 +99,8 @@ class TweetAPI:
         resp = self.T.get(url, params=params)
         page = resp.json()
 
-        if ("data" not in page) or ("includes" not in page):  # tweet doesn't exist (maybe was deleted)
+        # tweet doesn't exist (maybe was deleted)
+        if ("data" not in page) or ("includes" not in page):
             return None
 
         # add username of the tweet's author to the data dict to return only the data dict.
@@ -116,7 +118,8 @@ class TweetAPI:
             return [None]
 
         # map from user Id to username
-        id_username_dict = {u["id"]: u["username"] for u in response["includes"]["users"]}
+        id_username_dict = {u["id"]: u["username"]
+                            for u in response["includes"]["users"]}
         tweets = response["data"]
         for t in tweets:  # for each tweet add its username of its author
             t["username"] = id_username_dict[t["author_id"]]
@@ -133,7 +136,8 @@ class TweetAPI:
                      "lang": root_tweet["lang"], "text": root_tweet["text"], "replies": []}
         if "replies" in root_tweet:  # check that the tweet as replies
             for reply in root_tweet["replies"]:  # reformat children
-                new_tweet["replies"].append(self.__format_tweets_in_conv_hierarchy(reply))
+                new_tweet["replies"].append(
+                    self.__format_tweets_in_conv_hierarchy(reply))
 
         return new_tweet
 
@@ -145,7 +149,8 @@ class TweetAPI:
         :return: dict: the conversation.
         """
 
-        id_tweet_dict = {t["id"]: t for t in tweets}  # A map from tweet id to tweet object
+        # A map from tweet id to tweet object
+        id_tweet_dict = {t["id"]: t for t in tweets}
 
         # nest tweets according to the conversation threads
         for t in tweets:
@@ -173,7 +178,8 @@ class TweetAPI:
             if "replies" in t:
                 t["replies"].sort(key=lambda x: x["created_at"])
 
-        root_tweet = id_tweet_dict[conv_id]  # original tweet that started the conversation
+        # original tweet that started the conversation
+        root_tweet = id_tweet_dict[conv_id]
         return {conv_id: self.__format_tweets_in_conv_hierarchy(root_tweet)}
 
     def parse_as_samsum_dataset(self, conv_id, tweets):
@@ -210,7 +216,8 @@ class TweetAPI:
         query = "conversation_id:" + conv_id
 
         root_tweet = self.__get_tweet(conv_id)
-        if root_tweet is None:  # root tweet doesn't exist (was deleted or due to authorization error )
+        # root tweet doesn't exist (was deleted or due to authorization error )
+        if root_tweet is None:
             return None
 
         # ignore conversation with head tweet not written in English
@@ -218,11 +225,13 @@ class TweetAPI:
             return None
 
         tweets = [root_tweet]  # get first (initiator) tweet
-        for response_page in self.__search_recent(query, max_results=max_results):  # get all tweets in the conversation
+        # get all tweets in the conversation
+        for response_page in self.__search_recent(query, max_results=max_results):
             tweets += self.__parse_response(response_page)
 
         tweets = [t for t in tweets if t is not None]  # remove all Nones
-        tweets = [t for t in tweets if "lang" in t and t["lang"] == "en"]  # remove non-English tweets
+        tweets = [t for t in tweets if "lang" in t and t["lang"]
+                  == "en"]  # remove non-English tweets
 
         return parse_func(conv_id, tweets)
 
@@ -246,7 +255,8 @@ class TweetAPI:
         self.log.info("{} conversations are loaded".format(len(conv_list)))
         res = []
         for conv_id in conv_list:  # fetch tweets of each conversation
-            parsed_conv = self.__get_conversation(conv_id=conv_id, max_results=max_page_res, parse_func=parse_func)
+            parsed_conv = self.__get_conversation(
+                conv_id=conv_id, max_results=max_page_res, parse_func=parse_func)
             if parsed_conv is None:
                 continue
 
