@@ -16,19 +16,27 @@
         - Response is a JSON Object of conversations topics probabilities and topic names.
 
    - "/summarize": Perform summarization on passed twitter conversations.
-    - GET request
-    - Body must be json of the format:
-        {
-            "conversation": <list of twitter conversation as returned from the /search endpoint>,
-        }
-    - Response is a JSON Object of conversations summaries.
+        - GET request
+        - Body must be json of the format:
+            {
+                "conversation": <list of twitter conversation as returned from the /search endpoint>,
+            }
+        - Response is a JSON Object of conversations summaries.
+
+    - "/topic-aware-summarize": Perform topic aware summarization on passed twitter conversations.
+        - GET request
+        - Body must be json of the format:
+            {
+                "conversation": <list of twitter conversation as returned from the /search endpoint>,
+            }
+        - Response is a JSON Object of conversations summaries with respect to different topics.
 """
 
 import json
 from summarization.models.bart import Bart
 from summarization.agents.agent_factory import AgentsFactory
 #from twitter_api.twitter_api import TweetAPI
-from topic_aware_sum import TopicAwareSummarization
+from summarization.topic_aware_summarization.topic_aware_summarization import TopicAwareSummarization
 from topic_modeling.Bertopic import Bertopic
 from flask import Flask, request, jsonify
 import config
@@ -43,9 +51,7 @@ summarizer_model = Bart(config.Config.SUMMARIZATION_MODEL)
 summarizer_agent = AgentsFactory.get_agent(summarizer_model)
 topic_aware_summarizer = TopicAwareSummarization()
 
-
 if __name__ != '__main__':
-    print("buraya geldi")
     # App is being run externally (through gunicorn).
     gunicorn_logger_access = logging.getLogger("gunicorn.access")
     # Use the gunicorn logger as the app logger.
@@ -66,45 +72,32 @@ def fetch_conversations():
 @app.route('/topics', methods=["POST"])
 def fetch_topics():
     # return jsonify({"body": request.json, "num_topics": request.args["num_topics"]})
-    # print(request.form)
-    print(1)
     conversation_list = request.json["conversations"]
-    print(2)
     num_topics = int(request.args["num_topics"])
-    print(3)
     if config.Config.TOPIC_PER_TWEET:
-        print(4)
         conv_topic_probs, topics = bertopic.run_tweet_topic_modeling(conversation_list, num_topics=num_topics)
-        print(5)
     else:
-        print(6)
         conv_topic_probs, topics = bertopic.run_con_topic_modeling(conversation_list, num_topics=num_topics)
-        print(7)
 
     return jsonify({"topics": conv_topic_probs, "index_to_topic": topics})
 
 
 @app.route('/summarize', methods=["POST"])
 def fetch_summaries():
-    print(1)
     conversation_list = request.json["conversations"]
-    print(2)
-    conv_summary_dict = summarizer_agent.run_all(conversation_list)
-    print(3)
+    conv_summary_dict = summarizer_agent.run_all(conversation_list[:100])
     return jsonify({"summaries": conv_summary_dict})
 
 
-
-
-@app.route('/bart-summarize', methods=["POST"])
+@app.route('/topic-aware-summarize', methods=["POST"])
 def bart_summarize():
     conversation_list = request.json["conversations"]
-    dialogue_sentences = request.json["conversations"][0]
     topics_df, topic_embeddings = bertopic.get_topic_embeddings(conversation_list)
-    dict_topic_sentences, conv_id = topic_aware_summarizer.extract_topic_sentences(dialogue_sentences, topics_df, topic_embeddings)
-    summarizer_agent.run_all([dict_topic_sentences])
-    print(dict_topic_sentences)
-    return jsonify({"dict_topic_sentences": dict_topic_sentences})
+    dict_topic_sentences = topic_aware_summarizer.extract_topic_sentences(conversation_list[:100], topics_df,
+                                                                          topic_embeddings)
+    conv_summaries = summarizer_agent.run_all_topic_aware(dict_topic_sentences)
+    return jsonify({"conv_summaries": conv_summaries})
+
 
 @app.route('/health', methods=["GET"])
 def get_health_status():
@@ -132,7 +125,6 @@ def handle_not_found(error):
 @app.errorhandler(Exception)
 def handle_server_error(error):
     return jsonify({"message": "Internal server error: {}".format(error)}), 500
-
 
 # if __name__ == '__main__':
 #     import json

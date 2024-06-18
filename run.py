@@ -1,4 +1,4 @@
-from topic_aware_sum import get_similarity_matrix
+from summarization.topic_aware_summarization.topic_aware_summarization import get_similarity_matrix
 
 
 def run(text):

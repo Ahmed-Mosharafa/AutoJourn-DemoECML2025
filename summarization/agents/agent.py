@@ -13,17 +13,25 @@ class Agent(ABC):
         pass
 
     def run_all(self, conv_list: List[Dict[str, List[str]]]) -> Dict[str, str]:
-        print(4)
         summaries = {}  # conversation summaries
-        print(5)
         for conv_dict in conv_list:
-            conv_root = list(conv_dict.items())[0][1]
-            conv_id = 1#list(conv_dict.items())[1][1]
-
-            #conv_root, conv_id = next(iter(conv_dict.items()))
+            conv_root = conv_dict['dialogue']
+            conv_id = conv_dict['id']
+            # conv_root, conv_id = next(iter(conv_dict.items()))
             conv_summary = self.run_conv(conv_root)
-            print(7)
             summaries[conv_id] = conv_summary
-            print(8)
 
         return summaries
+
+    def run_all_topic_aware(self, conv_list: List[Dict[str, List[str]]]) -> Dict[str, Dict[str, str]]:
+        conv_summaries = {}  # conversation summaries
+        for conv_dict in conv_list:
+            # Save the conv id.
+            conv_id = conv_dict.pop('id')
+            topic_summaries = {}
+            for topic, sentences in conv_dict.items():
+                conv_summary = self.run_conv(sentences)
+                topic_summaries[topic] = conv_summary # Dict[str, str]
+            conv_summaries[conv_id] = topic_summaries
+
+        return conv_summaries

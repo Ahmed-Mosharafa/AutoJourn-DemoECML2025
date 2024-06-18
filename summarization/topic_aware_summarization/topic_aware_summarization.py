@@ -2,17 +2,16 @@ import ast
 import numpy as np
 import pandas as pd
 import torch
-import pickle
-
 from src import preprocessing, nltk_utilities
 from src.sentence_transformer_utilities import SentTransfUtilities
-from topic_modeling.Bertopic import Bertopic
 
 
 class TopicAwareSummarization:
+    def __init__(self):
+        self.sentence_transformer_model = "paraphrase-multilingual-MiniLM-L12-v2"
 
     def get_emb_cluster_topic(self, sentTransfModelUtilsObj):
-        df_latVectorRep = pd.read_csv('data/_20news_df_output_clusterId_label_words.csv')
+        df_latVectorRep = pd.read_csv('../../data/_20news_df_output_clusterId_label_words.csv')
         df_latVectorRep["sentence_from_words"] = df_latVectorRep["list_topic_words"].map(
             lambda x: " ".join(ast.literal_eval(x)))
         list_embeddings_cluster_sentences = list()
@@ -23,9 +22,7 @@ class TopicAwareSummarization:
         return list_embeddings_cluster_sentences, df_latVectorRep
 
     def text_to_sentences(self, data):
-
         list_sentences = [*nltk_utilities.NltkSegmentizer().segment_into_sentences(data)]
-
         return list_sentences
 
     def preprocess(self, list_sentences, sentTransfModelUtilsObj):
@@ -55,7 +52,6 @@ class TopicAwareSummarization:
         topic_labels = topics_df["Name"].values.tolist()
         for index_sentence, index_id_topic in enumerate(list_index_topics_within_matrix):
             label_class = topic_labels[index_id_topic]
-
             if label_class not in dict_topic_sentences.keys():
                 dict_topic_sentences[label_class] = list()
             dict_topic_sentences[label_class].append(list_sentences[index_sentence])
@@ -63,23 +59,21 @@ class TopicAwareSummarization:
         return dict_topic_sentences
 
     def get_similarity_matrix(self, data) -> dict:
-        print('1')
-        MODEL_NAME = "paraphrase-multilingual-MiniLM-L12-v2"
-        sentTransfModelUtilsObj = SentTransfUtilities(model_name=MODEL_NAME)
-        print('12')
+        sent_transf_model_utils_obj = SentTransfUtilities(model_name=self.sentence_transformer_model)
         data_sentences = self.text_to_sentences(data)
-        print('13')
-        data_embed, list_sentences = self.preprocess(data_sentences, sentTransfModelUtilsObj)
-        print('14')
-        return self.compute_similarity_matrix(data_embed, list_sentences, sentTransfModelUtilsObj)
+        data_embed, list_sentences = self.preprocess(data_sentences, sent_transf_model_utils_obj)
+        return self.compute_similarity_matrix(data_embed, list_sentences, sent_transf_model_utils_obj)
 
-    def extract_topic_sentences(self, data, topics_df, topic_embeddings):
-        MODEL_NAME = "paraphrase-multilingual-MiniLM-L12-v2"
-        sentTransfModelUtilsObj = SentTransfUtilities(model_name=MODEL_NAME)
-        # TODO: Do it for each dialogue.
-        data_sentences = self.text_to_sentences(data['dialogue'])
-        conv_id = data['id']
-        sentence_embed, list_sentences = self.preprocess(data_sentences, sentTransfModelUtilsObj)
-        dict_topic_sentences = self.compute_similarity_matrix(sentence_embed, list_sentences, sentTransfModelUtilsObj,
-                                                         topic_embeddings, topics_df)
-        return dict_topic_sentences, conv_id
+    def extract_topic_sentences(self, conv_docs, topics_df, topic_embeddings):
+        sent_transf_model_utils_obj = SentTransfUtilities(model_name=self.sentence_transformer_model)
+        # Topic sentence matrix for each conversation.
+        topic_sentence_matrices = []
+        for conv in conv_docs:
+            data_sentences = self.text_to_sentences(conv['dialogue'])
+            sentence_embed, list_sentences = self.preprocess(data_sentences, sent_transf_model_utils_obj)
+            dict_topic_sentences = self.compute_similarity_matrix(sentence_embed, list_sentences,
+                                                                  sent_transf_model_utils_obj, topic_embeddings,
+                                                                  topics_df)
+            dict_topic_sentences['id'] = conv['id']
+            topic_sentence_matrices.append(dict_topic_sentences)
+        return topic_sentence_matrices
