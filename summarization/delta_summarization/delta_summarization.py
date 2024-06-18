@@ -2,6 +2,7 @@ from typing import Dict
 import numpy as np
 from sentence_transformers import SentenceTransformer, util
 import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
 
 summary1 = '''A Bugatti Chiron, powerd by its turbocharged 8 liter engine with 16 cylinder4s and 1600 horse- 
 power, drove at record braking speeds of up to 417 
@@ -55,8 +56,20 @@ class DeltaSummarization:
         plt.show()
         return cosine_similarity_matrix
 
-    def create_2d_scatter_plot(self):
-        pass
+    def create_2d_scatter_plot(self, topic_summaries: Dict[str, str]):
+        pca = PCA(n_components=2)
+        topics = list(topic_summaries.keys())
+        summaries = list(topic_summaries.values())
+        summary_embeddings = self.model.encode(summaries)
+        summary_embeddings_2d = pca.fit_transform(summary_embeddings)
+        # Scatter plot
+        plt.scatter(summary_embeddings_2d[:, 0], summary_embeddings_2d[:, 1], marker='x')
+        for i, label in enumerate(topics):
+            plt.text(summary_embeddings_2d[i, 0], summary_embeddings_2d[i, 1], label)
+        plt.xlabel("X")
+        plt.ylabel("Y")
+        plt.title("Topic Summaries Scatter Plot")
+        plt.show()
 
 
 delta = DeltaSummarization()
@@ -64,5 +77,7 @@ delta.find_cosine_similarity(summary1, summary2)
 topic_summaries = {
     "0_you_to_it_the": "May is depressed and doesn't want to see anyone. Karen will call someone for advice.",
     "2_doctor_and_to_the": "Adam and Karen worry about her. Karen suggested she should see a specialist. Adam has a friend who is a psychologist. ",
-    "7_the_is_ignorant_all": "Adam needs someone to call"}
+    "7_the_is_ignorant_all": "Adam needs someone to call"
+}
 delta.create_cosine_similarity_matrix(topic_summaries)
+delta.create_2d_scatter_plot(topic_summaries)
