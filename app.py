@@ -35,9 +35,8 @@
 import json
 from summarization.models.bart import Bart
 from summarization.agents.agent_factory import AgentsFactory
-#from twitter_api.twitter_api import TweetAPI
 from summarization.topic_aware_summarization.topic_aware_summarization import TopicAwareSummarization
-from api_connection.twitter_api.twitter_api import TweetAPI
+# from api_connection.twitter_api.twitter_api import TweetAPI
 from api_connection.telegram_api.telegram_api import TelegramAPI
 from topic_modeling.Bertopic import Bertopic
 from flask import Flask, request, jsonify
