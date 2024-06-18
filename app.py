@@ -102,7 +102,7 @@ def fetch_summaries():
 
 
 @app.route('/topic-aware-summarize', methods=["POST"])
-def bart_summarize():
+def topic_aware_summarize():
     conversation_list = request.json["conversations"]
     topics_df, topic_embeddings = bertopic.get_topic_embeddings(conversation_list)
     dict_topic_sentences = topic_aware_summarizer.extract_topic_sentences(conversation_list[:100], topics_df,
