@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import numpy as np
 import pandas as pd
-from src.sentence_transformer_utilities import SentTransfUtilities
+from utils.sentence_transformer_utilities import SentTransfUtilities
 
 
 class TopicModeling(ABC):

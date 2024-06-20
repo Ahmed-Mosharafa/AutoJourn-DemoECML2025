@@ -31,7 +31,7 @@ class Agent(ABC):
             topic_summaries = {}
             for topic, sentences in conv_dict.items():
                 conv_summary = self.run_conv(sentences)
-                topic_summaries[topic] = conv_summary # Dict[str, str]
+                topic_summaries[topic] = conv_summary
             conv_summaries[conv_id] = topic_summaries
 
         return conv_summaries
