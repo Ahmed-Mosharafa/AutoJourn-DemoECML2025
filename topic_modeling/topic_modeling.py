@@ -38,7 +38,6 @@ class TopicModeling(ABC):
         doc_conv_dict = {}  # Map each processed document to its conversation
         docs = []
         for conv_dict in data:
-            # conv_id, conv = next(iter(conv_dict.items()))  # each conv dictionary has one item {conv_id: [tweets]}
             conv_id = conv_dict['id']
             conv = conv_dict['dialogue'].split("\n")
             processed_conv = []
@@ -68,13 +67,11 @@ class TopicModeling(ABC):
         processed_origin_tweet_dict = {}  # map processed tweet to original one
         docs = []
         for conv_dict in data:
-            # conv_id, conv = next(iter(conv_dict.items()))  # each conv dictionary has one item {conv_id: [tweets]}
             conv_id = conv_dict['id']
             conv = conv_dict['dialogue'].split("\n")
             for tweet in conv:
                 tweet_conv_dict[tweet] = conv_id
                 t_tweet = self.preprocess(tweet)
-
                 # Some tweets after being processed will be similar. Since, we have to keep them unique to be able
                 # to map them back to original tweets, therefore, we add a suffixed special characters.
                 while t_tweet in processed_origin_tweet_dict:

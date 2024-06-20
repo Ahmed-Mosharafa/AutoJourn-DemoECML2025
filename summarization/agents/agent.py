@@ -17,7 +17,6 @@ class Agent(ABC):
         for conv_dict in conv_list:
             conv_root = conv_dict['dialogue']
             conv_id = conv_dict['id']
-            # conv_root, conv_id = next(iter(conv_dict.items()))
             conv_summary = self.run_conv(conv_root)
             summaries[conv_id] = conv_summary
 
