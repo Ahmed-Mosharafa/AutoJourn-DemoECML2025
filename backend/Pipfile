@@ -66,6 +66,7 @@ werkzeug = "==3.0.3"
 zipp = "==3.18.2"
 "zope.event" = "==5.0"
 "zope.interface" = "==6.4.post0"
+spacy = "*"
 
 [dev-packages]
 
