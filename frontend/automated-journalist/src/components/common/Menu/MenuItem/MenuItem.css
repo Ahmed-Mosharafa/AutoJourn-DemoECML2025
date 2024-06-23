@@ -1,0 +1,21 @@
+.item-container {
+  border-radius: 8px;
+  background-color: #fff;
+  display: flex;
+  gap: 16px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+.item-icon {
+  aspect-ratio: 1;
+  object-fit: auto;
+  object-position: center;
+  width: 24px;
+}
+.item-text {
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  text-overflow: ellipsis;
+  font-family: Inter, sans-serif;
+  flex: 1;
+}

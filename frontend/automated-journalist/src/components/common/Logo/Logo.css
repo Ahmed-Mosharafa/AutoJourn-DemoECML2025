@@ -1,0 +1,12 @@
+.home-logo {
+  color: rgba(0, 0, 0, 0.2);
+  letter-spacing: -0.26px;
+  max-width: 19vw;
+  font:
+    600 26px / 39px Inter,
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
+  padding-left: 3vw;
+}
