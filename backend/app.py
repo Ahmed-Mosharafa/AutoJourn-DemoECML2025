@@ -16,17 +16,27 @@
         - Response is a JSON Object of conversations topics probabilities and topic names.
 
    - "/summarize": Perform summarization on passed twitter conversations.
-    - GET request
-    - Body must be json of the format:
-        {
-            "conversation": <list of twitter conversation as returned from the /search endpoint>,
-        }
-    - Response is a JSON Object of conversations summaries.
+        - GET request
+        - Body must be json of the format:
+            {
+                "conversation": <list of twitter conversation as returned from the /search endpoint>,
+            }
+        - Response is a JSON Object of conversations summaries.
+
+    - "/topic-aware-summarize": Perform topic aware summarization on passed twitter conversations.
+        - GET request
+        - Body must be json of the format:
+            {
+                "conversation": <list of twitter conversation as returned from the /search endpoint>,
+            }
+        - Response is a JSON Object of conversations summaries with respect to different topics.
 """
 
+import json
 from summarization.models.bart import Bart
 from summarization.agents.agent_factory import AgentsFactory
-from api_connection.twitter_api.twitter_api import TweetAPI
+from summarization.topic_aware_summarization.topic_aware_summarization import TopicAwareSummarization
+# from api_connection.twitter_api.twitter_api import TweetAPI
 from api_connection.telegram_api.telegram_api import TelegramAPI
 from topic_modeling.Bertopic import Bertopic
 from flask import Flask, request, jsonify
@@ -36,11 +46,12 @@ import logging
 # Initialize the application's components
 app = Flask('NLPLAB')
 config.init()
-api = TweetAPI()
+#api = TweetAPI()
 tele_api = TelegramAPI()
 bertopic = Bertopic()
 summarizer_model = Bart(config.Config.SUMMARIZATION_MODEL)
 summarizer_agent = AgentsFactory.get_agent(summarizer_model)
+topic_aware_summarizer = TopicAwareSummarization()
 
 if __name__ != '__main__':
     # App is being run externally (through gunicorn).
@@ -61,20 +72,16 @@ def fetch_telegram():
 
 
 @app.route('/search', methods=["GET"])
-def fetch_tweets():
-    query = request.args["query"]
-    response = api.get_conversations(search_keyword=query,
-                                     max_num_conv=config.Config.API_MAX_NUM_CONVERSATIONS,
-                                     max_num_pages=config.Config.API_MAX_NUM_PAGES,
-                                     max_page_res=config.Config.API_MAX_PAGE_NUM_RESULTS,
-                                     parse_func=api.parse_as_conv_hierarchy)
-    return jsonify({"conversations": response})
+def fetch_conversations():
+    # Load conversations from a local JSON file
+    with open('dataset/test.json', 'r') as infile:  # Replace with your dataset path
+        conversations = json.load(infile)
+    return jsonify({"conversations": conversations})
 
 
 @app.route('/topics', methods=["POST"])
 def fetch_topics():
     # return jsonify({"body": request.json, "num_topics": request.args["num_topics"]})
-    # print(request.form)
     conversation_list = request.json["conversations"]
     num_topics = int(request.args["num_topics"])
     if config.Config.TOPIC_PER_TWEET:
@@ -92,6 +99,23 @@ def fetch_summaries():
     conversation_list = request.json["conversations"]
     conv_summary_dict = summarizer_agent.run_all(conversation_list)
     return jsonify({"summaries": conv_summary_dict})
+
+
+@app.route('/topic-aware-summarize', methods=["POST"])
+def topic_aware_summarize():
+    conversation_list = request.json["conversations"]
+    topics_df, topic_embeddings = bertopic.get_topic_embeddings(conversation_list)
+    dict_topic_sentences = topic_aware_summarizer.extract_topic_sentences(conversation_list, topics_df,
+                                                                          topic_embeddings)
+    conv_summaries = summarizer_agent.run_all_topic_aware(dict_topic_sentences)
+    return jsonify({"conv_summaries": conv_summaries})
+
+
+@app.route('/delta-summarize', methods=["POST"])
+def delta_summarize():
+    summaries = request.json["summaries"]
+    #TODO: Return delta summarization plots.
+    return
 
 
 @app.route('/health', methods=["GET"])
@@ -121,7 +145,6 @@ def handle_not_found(error):
 @app.errorhandler(Exception)
 def handle_server_error(error):
     return jsonify({"message": "Internal server error: {}".format(error)}), 500
-
 
 # if __name__ == '__main__':
 #     import json

@@ -1,6 +1,7 @@
 from topic_modeling.topic_modeling import TopicModeling
 from bertopic import BERTopic
 from umap import UMAP
+from sentence_transformers import SentenceTransformer
 import re
 import numpy as np
 
@@ -20,26 +21,31 @@ class Bertopic(TopicModeling):
                           n_components=5,
                           min_dist=0.0,
                           metric='cosine')
-
+        sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
         self.model = BERTopic(nr_topics=None,
                               language="multilingual",  # Use multilingual sentence-tranformers embedding model
                               top_n_words=5,
                               calculate_probabilities=True,
                               verbose=True,
                               n_gram_range=(1, 1),
-                              umap_model=umap_model)
+                              umap_model=umap_model,
+                              embedding_model=sentence_model)
 
     def get_topics(self, docs, num_topics):
         topics, probs = self.model.fit_transform(docs)  # fit the model to compute the topics
-        # reduce the number of topics to self.num_topics
-        _, new_probs = self.model.reduce_topics(docs, topics, probabilities=probs, nr_topics=num_topics)
+        # Reduce computed topics only if it's more than the given num_topics.
+        if probs.shape[1] > num_topics:
+            self.model.reduce_topics(docs, nr_topics=num_topics)
+        topic_embeddings = self.model.topic_embeddings_
         # topic_df which hold in each row the topic number and name
         topics_df = self.model.get_topic_info()
         # remove outlier topic which has topic number = -1
+        if -1 in topics_df["Topic"].tolist():
+            topic_embeddings = topic_embeddings[1:]
         topics_df = topics_df[topics_df["Topic"] != -1]
         # new_probs has the same shape as probs. We will remove the columns of reduced topics (has zero probability)
         new_probs = np.apply_along_axis(lambda doc_prob: doc_prob[:len(topics_df)], axis=1, arr=probs)
-        return topics_df, new_probs
+        return topics_df, new_probs, topic_embeddings
 
     def preprocess(self, tweet):
         t_tweet = re.sub(r"http\S+", "", tweet)  # remove links
