@@ -16,8 +16,15 @@ class TelegramAPI:
         return parse_func(result) if parse_func else self.parse_all_messages_json(result)
 
     def query(self, query: str, channel_limit=5, message_limit=10) -> list[MessageThread]:
-        result = asyncio.run(self.query_async(
-            query, channel_limit, message_limit))
+        print("before loop")
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        task = asyncio.ensure_future(self.query_async(query, channel_limit, message_limit))
+        result = loop.run_until_complete(task)
+        loop.close()
+        print("closing loop")
+        # result = asyncio.run(self.query_async(
+        #     query, channel_limit, message_limit))
         return result
 
     async def query_async(self, query: str, channel_limit=5, message_limit=10) -> list[MessageThread]:
@@ -27,9 +34,13 @@ class TelegramAPI:
             query_result = []
 
             for channel in channels:
-                messages = await self.get_messages_from_channel(channel.title, message_limit)
-                message_thread = MessageThread(channel.id, messages)
-                query_result.append(message_thread)
+                try:
+                    messages = await self.get_messages_from_channel(channel.title, message_limit)
+                    message_thread = MessageThread(channel.id, messages)
+                    query_result.append(message_thread)
+                except Exception as e:
+                    print(e)
+                    continue
 
             return query_result
 
@@ -43,7 +54,7 @@ class TelegramAPI:
             await self.client.send_code_request(phone)
         try:
             await self.client.sign_in(phone, passkey)
-        except Exception as e:
+        except Exception:
             await self.client.sign_in(password=input('Password: '))
 
     async def get_messages_from_channel(self, channel_name: str, limit=10) -> list[types.Message]:
