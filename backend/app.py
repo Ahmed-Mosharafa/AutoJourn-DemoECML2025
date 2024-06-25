@@ -24,7 +24,7 @@
         - Response is a JSON Object of conversations summaries.
 
     - "/topic-aware-summarize": Perform topic aware summarization on passed twitter conversations.
-        - GET request
+        - POST request
         - Body must be json of the format:
             {
                 "conversation": <list of twitter conversation as returned from the /search endpoint>,
