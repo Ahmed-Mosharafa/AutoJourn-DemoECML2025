@@ -3,6 +3,7 @@ import numpy as np
 from sentence_transformers import SentenceTransformer, util
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
+import io
 
 summary1 = '''A Bugatti Chiron, powerd by its turbocharged 8 liter engine with 16 cylinder4s and 1600 horse- 
 power, drove at record braking speeds of up to 417 
@@ -27,7 +28,7 @@ class DeltaSummarization:
         cosine_similarity = util.pytorch_cos_sim(embedding1, embedding2).item()
         return cosine_similarity
 
-    def create_cosine_similarity_matrix(self, topic_summaries: Dict[str, str]):
+    def create_cosine_similarity_matrix(self, img_buffer, topic_summaries: Dict[str, str]):
         topics = list(topic_summaries.keys())
         topic_summaries = list(topic_summaries.items())
         summary_count = len(topic_summaries)
@@ -53,10 +54,12 @@ class DeltaSummarization:
         # Adjust the figure size and margins
         plt.gcf().set_size_inches(10, 8)
         plt.tight_layout()
-        plt.show()
-        return cosine_similarity_matrix
+        plt.savefig(img_buffer, format='png')
+        img_buffer.seek(0)
+        plt.close()
+        return img_buffer
 
-    def create_2d_scatter_plot(self, topic_summaries: Dict[str, str]):
+    def create_2d_scatter_plot(self, img_buffer, topic_summaries: Dict[str, str]):
         pca = PCA(n_components=2)
         topics = list(topic_summaries.keys())
         summaries = list(topic_summaries.values())
@@ -69,7 +72,19 @@ class DeltaSummarization:
         plt.xlabel("X")
         plt.ylabel("Y")
         plt.title("Topic Summaries Scatter Plot")
-        plt.show()
+        plt.savefig(img_buffer, format='png')
+        img_buffer.seek(0)
+        plt.close()
+        return img_buffer
+
+    def send_plot(self, plot_type: str, topic_summaries: Dict[str, str]):
+        img_buffer = io.BytesIO()
+        if plot_type == 'cosine_similarity':
+            img_buffer = self.create_cosine_similarity_matrix(img_buffer, topic_summaries)
+        elif plot_type == '2d_scatter_plot':
+            img_buffer = self.create_2d_scatter_plot(img_buffer, topic_summaries)
+
+        return img_buffer
 
 
 delta = DeltaSummarization()
