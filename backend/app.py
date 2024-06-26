@@ -124,7 +124,7 @@ def topic_aware_summarize():
 @app.route('/delta-summarize', methods=["POST"])
 def delta_summarize():
     summaries = request.json["summaries"]
-    plot_type = request.args["plot_type"]
+    plot_type = request.json["plot_type"]
     plot_img = delta_summarizer.send_plot(plot_type, summaries)
     return send_file(plot_img, mimetype='image/png')
 
