@@ -83,7 +83,7 @@ def fetch_conversations():
 def fetch_topics():
     # return jsonify({"body": request.json, "num_topics": request.args["num_topics"]})
     conversation_list = request.json["conversations"]
-    num_topics = int(request.args["num_topics"])
+    num_topics = int(request.json["num_topics"])
     # Update topic count if necessary.
     bertopic.check_topic_count(num_topics)
     if config.Config.TOPIC_PER_TWEET:
@@ -104,7 +104,7 @@ def fetch_summaries():
 @app.route('/topic-aware-summarize', methods=["POST"])
 def topic_aware_summarize():
     conversation_list = request.json["conversations"]
-    num_topics = int(request.args["num_topics"])
+    num_topics = int(request.json["num_topics"])
     # Update topic count if necessary.
     bertopic.check_topic_count(num_topics)
     topics_df, topic_embeddings = bertopic.get_topic_embeddings(conversation_list)
