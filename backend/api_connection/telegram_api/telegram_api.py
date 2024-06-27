@@ -11,8 +11,8 @@ class TelegramAPI:
         self.client = TelegramClient(
             'nlp_user', config.Config.TELEGRAM_API_ID, config.Config.TELEGRAM_API_HASH)
 
-    def get_conversations(self, query: str, channel_limit=5, message_limit=10, parse_func=None):
-        result = self.query(query, channel_limit, message_limit)
+    async def get_conversations(self, query: str, channel_limit=5, message_limit=10, parse_func=None):
+        result = await self.query_async(query, channel_limit, message_limit)
         return parse_func(result) if parse_func else self.parse_all_messages_json(result)
 
     def query(self, query: str, channel_limit=5, message_limit=10) -> list[MessageThread]:
