@@ -41,19 +41,21 @@
 """
 
 import json
-from backend.summarization.delta_summarization.delta_summarization import DeltaSummarization
+from summarization.delta_summarization.delta_summarization import DeltaSummarization
 from summarization.models.bart import Bart
 from summarization.agents.agent_factory import AgentsFactory
 from summarization.topic_aware_summarization.topic_aware_summarization import TopicAwareSummarization
 # from api_connection.twitter_api.twitter_api import TweetAPI
 from api_connection.telegram_api.telegram_api import TelegramAPI
 from topic_modeling.Bertopic import Bertopic
+from asgiref.wsgi import WsgiToAsgi
 from flask import Flask, request, jsonify, send_file
 import config
 import logging
 
 # Initialize the application's components
 app = Flask('NLPLAB')
+asgi_app = WsgiToAsgi(app)
 config.init()
 # api = TweetAPI()
 tele_api = TelegramAPI()
@@ -74,9 +76,9 @@ if __name__ != '__main__':
 
 
 @app.route('/search-telegram', methods=["GET"])
-def fetch_telegram():
+async def fetch_telegram():
     query = request.args["query"]
-    response = tele_api.get_conversations(query, channel_limit=config.Config.MAX_NUM_OF_TELEGRAM_CHANNELS,
+    response = await tele_api.get_conversations(query, channel_limit=config.Config.MAX_NUM_OF_TELEGRAM_CHANNELS,
                                           message_limit=config.Config.MAX_NUM_OF_TELEGRAM_MESSAGES_PER_CHANNEL)
     return jsonify({"conversations": response})
 

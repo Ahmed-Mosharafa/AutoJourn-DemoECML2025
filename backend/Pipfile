@@ -67,6 +67,9 @@ zipp = "==3.18.2"
 "zope.event" = "==5.0"
 "zope.interface" = "==6.4.post0"
 spacy = "*"
+python-dotenv = "*"
+asgiref = "*"
+uvicorn = "*"
 
 [dev-packages]
 

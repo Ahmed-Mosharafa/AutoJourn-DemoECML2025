@@ -18,6 +18,8 @@ export function Feed({setSelectedDialogue,isSearch}: FeedProps) {
   const navigate = useNavigate();
   const [selectedAPI, setSelectedAPI] = useState("");
   const [selectedDialogueIndex, setselectedDialogueIndex] = useState(-1);
+  const [searchQuery, setSearchQuery] = useState("");
+
   const title = "Topic: ";
   let topic = "US Elections";
   let time = "Fetched: 3 min ago";
@@ -68,7 +70,7 @@ export function Feed({setSelectedDialogue,isSearch}: FeedProps) {
     <>
       <div className="api-selector">
         <ApiSelector setSelectedAPI={setSelectedAPI} />
-        {isSearch ? <SearchBar /> : <></>}
+        {isSearch ? <SearchBar setSearchQuery={setSearchQuery}/> : <></>}
       </div>
       <div className="dialogues-area">
         <div className="topic-area">
