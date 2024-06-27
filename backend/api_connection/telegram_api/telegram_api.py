@@ -16,15 +16,8 @@ class TelegramAPI:
         return parse_func(result) if parse_func else self.parse_all_messages_json(result)
 
     def query(self, query: str, channel_limit=5, message_limit=10) -> list[MessageThread]:
-        print("before loop")
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        task = asyncio.ensure_future(self.query_async(query, channel_limit, message_limit))
-        result = loop.run_until_complete(task)
-        loop.close()
-        print("closing loop")
-        # result = asyncio.run(self.query_async(
-        #     query, channel_limit, message_limit))
+        result = asyncio.run(self.query_async(
+            query, channel_limit, message_limit))
         return result
 
     async def query_async(self, query: str, channel_limit=5, message_limit=10) -> list[MessageThread]:
