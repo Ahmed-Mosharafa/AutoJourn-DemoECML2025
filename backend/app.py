@@ -24,23 +24,32 @@
         - Response is a JSON Object of conversations summaries.
 
     - "/topic-aware-summarize": Perform topic aware summarization on passed twitter conversations.
-        - GET request
+        - POST request
         - Body must be json of the format:
             {
                 "conversation": <list of twitter conversation as returned from the /search endpoint>,
             }
         - Response is a JSON Object of conversations summaries with respect to different topics.
+
+    - "/delta-summarize": Perform delta summarization on passed topic aware summaries.
+        - POST request
+        - Body must be json of the format:
+            {
+                "summaries": <dict of topic aware summaries>,
+            }
+        - Response is a type of plot (image) showing how different are the summarizations.
 """
 
 import json
+from summarization.delta_summarization.delta_summarization import DeltaSummarization
 from summarization.models.bart import Bart
 from summarization.agents.agent_factory import AgentsFactory
 from summarization.topic_aware_summarization.topic_aware_summarization import TopicAwareSummarization
 # from api_connection.twitter_api.twitter_api import TweetAPI
 from api_connection.telegram_api.telegram_api import TelegramAPI
 from topic_modeling.Bertopic import Bertopic
-from flask import Flask, request, jsonify
 from asgiref.wsgi import WsgiToAsgi
+from flask import Flask, request, jsonify, send_file
 import config
 import logging
 
@@ -48,12 +57,13 @@ import logging
 app = Flask('NLPLAB')
 asgi_app = WsgiToAsgi(app)
 config.init()
-#api = TweetAPI()
+# api = TweetAPI()
 tele_api = TelegramAPI()
-bertopic = Bertopic()
+bertopic = Bertopic(num_topics=10)  # Default number of topics is 10.
 summarizer_model = Bart(config.Config.SUMMARIZATION_MODEL)
 summarizer_agent = AgentsFactory.get_agent(summarizer_model)
 topic_aware_summarizer = TopicAwareSummarization()
+delta_summarizer = DeltaSummarization()
 
 if __name__ != '__main__':
     # App is being run externally (through gunicorn).
@@ -85,13 +95,13 @@ def fetch_conversations():
 def fetch_topics():
     # return jsonify({"body": request.json, "num_topics": request.args["num_topics"]})
     conversation_list = request.json["conversations"]
-    num_topics = int(request.args["num_topics"])
+    num_topics = int(request.json["num_topics"])
+    # Update topic count if necessary.
+    bertopic.check_topic_count(num_topics)
     if config.Config.TOPIC_PER_TWEET:
-        conv_topic_probs, topics = bertopic.run_tweet_topic_modeling(
-            conversation_list, num_topics=num_topics)
+        conv_topic_probs, topics = bertopic.run_tweet_topic_modeling(conversation_list)
     else:
-        conv_topic_probs, topics = bertopic.run_con_topic_modeling(
-            conversation_list, num_topics=num_topics)
+        conv_topic_probs, topics = bertopic.run_con_topic_modeling(conversation_list)
 
     return jsonify({"topics": conv_topic_probs, "index_to_topic": topics})
 
@@ -106,8 +116,11 @@ def fetch_summaries():
 @app.route('/topic-aware-summarize', methods=["POST"])
 def topic_aware_summarize():
     conversation_list = request.json["conversations"]
+    num_topics = int(request.json["num_topics"])
+    # Update topic count if necessary.
+    bertopic.check_topic_count(num_topics)
     topics_df, topic_embeddings = bertopic.get_topic_embeddings(conversation_list)
-    dict_topic_sentences = topic_aware_summarizer.extract_topic_sentences(conversation_list, topics_df,
+    dict_topic_sentences = topic_aware_summarizer.extract_topic_sentences(conversation_list[:2], topics_df,
                                                                           topic_embeddings)
     conv_summaries = summarizer_agent.run_all_topic_aware(dict_topic_sentences)
     return jsonify({"conv_summaries": conv_summaries})
@@ -116,8 +129,9 @@ def topic_aware_summarize():
 @app.route('/delta-summarize', methods=["POST"])
 def delta_summarize():
     summaries = request.json["summaries"]
-    #TODO: Return delta summarization plots.
-    return
+    plot_type = request.json["plot_type"]
+    plot_img = delta_summarizer.send_plot(plot_type, summaries)
+    return send_file(plot_img, mimetype='image/png')
 
 
 @app.route('/health', methods=["GET"])
