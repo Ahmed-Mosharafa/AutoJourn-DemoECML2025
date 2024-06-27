@@ -7,8 +7,12 @@ import { ApiSelector } from "./components/common/ApiSelector/ApiSelectorLayout/A
 import { HotTopics } from "./components/common/HotTopics/HotTopicsLayout/HotTopics";
 import { Summary } from "./components/Summary/Summary";
 import { Settings } from "./components/Settings/Settings";
+import { useState } from "react";
+import { Samsum } from "./backend-objects/Samsum";
 
 function App() {
+  const [selectedDialogue, setSelectedDialogue] = useState<Samsum | null>(null);
+
   return (
     <>
       <BrowserRouter>
@@ -21,10 +25,10 @@ function App() {
         </div>
         <div className="content">
           <Routes>
-            <Route path="/" element={<Feed />} />
-            <Route path="/feed" element={<Feed />} />
-            <Route path="/search" element={<Feed isSearch={true}/>} />
-            <Route path="/summary" element={<Summary />} />
+            <Route path="/" element={<Feed setSelectedDialogue={setSelectedDialogue} />} />
+            <Route path="/feed" element={<Feed setSelectedDialogue={setSelectedDialogue} />} />
+            <Route path="/search" element={<Feed setSelectedDialogue={setSelectedDialogue} isSearch={true}/>} />
+            <Route path="/summary" element={<Summary selectedDialogue={selectedDialogue}/>} />
             <Route path="/settings" element={<Settings />} />
           </Routes>
         </div>
