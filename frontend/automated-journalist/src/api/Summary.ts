@@ -25,7 +25,7 @@ export class TopicAwareSummary extends Summary {
         // Make a POST request to the backend API to get the summary
         let response = await axios.post(backendUrl + '/topic-aware-summarize', {
             conversation_list: this.conversations,
-            numOfTopics: this.numOfTopics
+            num_topics: this.numOfTopics
         })
 
         return response.data.conv_summaries;
