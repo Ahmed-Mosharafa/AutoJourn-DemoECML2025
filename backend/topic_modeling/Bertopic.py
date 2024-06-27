@@ -15,7 +15,8 @@ class Bertopic(TopicModeling):
     certain topics can be found in a document.
     """
 
-    def __init__(self):
+    def __init__(self, num_topics: int):
+        self.num_topics = num_topics
         umap_model = UMAP(n_neighbors=15,
                           transform_seed=173,  # fix a seed to avoid randomization in UMAP (we use a prime number)
                           n_components=5,
@@ -31,11 +32,11 @@ class Bertopic(TopicModeling):
                               umap_model=umap_model,
                               embedding_model=sentence_model)
 
-    def get_topics(self, docs, num_topics):
+    def get_topics(self, docs):
         topics, probs = self.model.fit_transform(docs)  # fit the model to compute the topics
         # Reduce computed topics only if it's more than the given num_topics.
-        if probs.shape[1] > num_topics:
-            self.model.reduce_topics(docs, nr_topics=num_topics)
+        if probs.shape[1] > self.num_topics:
+            self.model.reduce_topics(docs, nr_topics=self.num_topics)
         topic_embeddings = self.model.topic_embeddings_
         # topic_df which hold in each row the topic number and name
         topics_df = self.model.get_topic_info()
@@ -66,3 +67,7 @@ class Bertopic(TopicModeling):
                                    u"\U000024C2-\U0001F251"
                                    "]+", flags=re.UNICODE)
         return emoji_pattern.sub(r'', tweet)
+
+    def check_topic_count(self, num_topics):
+        if self.num_topics != num_topics:
+            self.num_topics = num_topics
