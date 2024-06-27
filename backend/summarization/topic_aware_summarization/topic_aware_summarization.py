@@ -26,7 +26,7 @@ class TopicAwareSummarization:
             for j, sentence_embedding in enumerate(list_sentences_per_doc_embeddings):
                 sentence_embedding = sentence_embedding.to(torch.float64)
                 similarity_matrix[i][j] = sent_transf_model_utils_obj.compute_cosine_similarity(cluster_embedding,
-                                                                                            sentence_embedding)
+                                                                                                sentence_embedding)
 
         list_index_topics_within_matrix = np.argmax(similarity_matrix, axis=0)
         dict_topic_sentences = dict()
