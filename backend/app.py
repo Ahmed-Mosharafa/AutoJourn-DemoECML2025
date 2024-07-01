@@ -47,6 +47,7 @@ from summarization.agents.agent_factory import AgentsFactory
 from summarization.topic_aware_summarization.topic_aware_summarization import TopicAwareSummarization
 # from api_connection.twitter_api.twitter_api import TweetAPI
 from api_connection.telegram_api.telegram_api import TelegramAPI
+from api_connection.reddit_api.reddit_api import RedditAPI
 from topic_modeling.Bertopic import Bertopic
 from asgiref.wsgi import WsgiToAsgi
 from flask import Flask, request, jsonify, send_file
@@ -59,6 +60,7 @@ asgi_app = WsgiToAsgi(app)
 config.init()
 # api = TweetAPI()
 tele_api = TelegramAPI()
+reddit_api = RedditAPI()
 bertopic = Bertopic(num_topics=10)  # Default number of topics is 10.
 summarizer_model = Bart(config.Config.SUMMARIZATION_MODEL)
 summarizer_agent = AgentsFactory.get_agent(summarizer_model)
@@ -82,6 +84,11 @@ async def fetch_telegram():
                                           message_limit=config.Config.MAX_NUM_OF_TELEGRAM_MESSAGES_PER_CHANNEL)
     return jsonify({"conversations": response})
 
+@app.route('/search-reddit', method=["GET"])
+def fetch_reddit():
+    query = request.args["query"]
+    response = reddit_api.search(query, limit=5)
+    return jsonify({"conversations": response})
 
 @app.route('/search', methods=["GET"])
 def fetch_conversations():
