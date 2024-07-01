@@ -109,8 +109,8 @@ def fetch_topics():
 @app.route('/summarize', methods=["POST"])
 def fetch_summaries():
     conversation_list = request.json["conversations"]
-    conv_summary_dict = summarizer_agent.run_all(conversation_list)
-    return jsonify({"summaries": conv_summary_dict})
+    conv_summaries = summarizer_agent.run_all(conversation_list)
+    return jsonify({"summaries": conv_summaries})
 
 
 @app.route('/topic-aware-summarize', methods=["POST"])

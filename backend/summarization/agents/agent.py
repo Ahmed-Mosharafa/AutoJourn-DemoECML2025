@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Dict
 from summarization.models.summarizer import SummarizationModel
+from summarization.models.samsum import Samsum
 
 
 class Agent(ABC):
@@ -13,12 +14,12 @@ class Agent(ABC):
         pass
 
     def run_all(self, conv_list: List[Dict[str, List[str]]]) -> Dict[str, str]:
-        summaries = {}  # conversation summaries
+        summaries = []  # conversation summaries
         for conv_dict in conv_list:
             conv_root = conv_dict['dialogue']
             conv_id = conv_dict['id']
             conv_summary = self.run_conv(conv_root)
-            summaries[conv_id] = conv_summary
+            summaries.append({'id': conv_id, 'summary': conv_summary})
 
         return summaries
 
