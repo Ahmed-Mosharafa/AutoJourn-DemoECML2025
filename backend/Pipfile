@@ -70,6 +70,7 @@ spacy = "*"
 python-dotenv = "*"
 asgiref = "*"
 uvicorn = "*"
+praw = "*"
 
 [dev-packages]
 

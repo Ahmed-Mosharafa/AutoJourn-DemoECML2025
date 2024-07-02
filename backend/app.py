@@ -84,7 +84,7 @@ async def fetch_telegram():
                                           message_limit=config.Config.MAX_NUM_OF_TELEGRAM_MESSAGES_PER_CHANNEL)
     return jsonify({"conversations": response})
 
-@app.route('/search-reddit', method=["GET"])
+@app.route('/search-reddit', methods=["GET"])
 def fetch_reddit():
     query = request.args["query"]
     response = reddit_api.search(query, limit=5)

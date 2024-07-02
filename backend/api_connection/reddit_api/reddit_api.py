@@ -1,7 +1,9 @@
-import os
-import requests
+import praw
 import config as config
 from enum import Enum
+from summarization.models.samsum import Samsum, MessageThread
+from api_connection.social_api import SocialAPI
+from praw import models
 
 class HTTPMethod(Enum):
     GET = "get"
@@ -9,48 +11,47 @@ class HTTPMethod(Enum):
     PUT = "put"
     DELETE = "delete"
 
-class RedditAPI:
+class RedditAPI(SocialAPI):
     base_url = "https://www.reddit.com/"
-    oauth_base_url = "https://oauth.reddit.com"
+    oauth_base_url = "https://oauth.reddit.com/"
 
     def __init__(self):
-        self.reddit_username = config.Config.REDDIT_USERNAME
-        self.reddit_password = config.Config.REDDIT_PASSWORD
-        self.reddit_api_id = config.Config.REDDIT_API_ID
-        self.reddit_api_secret = config.Config.REDDIT_API_SECRET
-        self.reddit_app_name = config.Config.REDDIT_APP_NAME
-        self.authentication_token = self.login_reddit()
+        self.client = praw.Reddit(
+            client_id=config.Config.REDDIT_API_ID,
+            client_secret=config.Config.REDDIT_API_SECRET,
+            user_agent=config.Config.REDDIT_APP_NAME,
+            username=config.Config.REDDIT_USERNAME,
+            password=config.Config.REDDIT_PASSWORD
+        )
 
-    def login_reddit(self):
-        data = {'grant_type': 'password', 'username': self.reddit_username, 'password': self.reddit_password}
-        auth = requests.auth.HTTPBasicAuth(self.reddit_api_id, self.reddit_api_secret)
-        headers = {'User-Agent': '{} by {}'.format(self.reddit_app_name, self.reddit_username)}
-
-        r = RedditAPI.make_request(self.base_url + 'api/v1/access_token',
-                    HTTPMethod.POST,
-                    auth=auth,
-                    headers=headers,
-                    body=data)
-        
-        return r.json()
-
-    def make_oath_request(self, request_endpoint: str, method: HTTPMethod):
-        headers = {'Authorization': self.authentication_token, 'User-Agent': '{} by {}'.format(self.reddit_app_name, self.reddit_username)}
-        return RedditAPI.make_request(request_endpoint, method, headers=headers)
-        
+    def get_conversations(self, query: str, limit=5, parse_func=None) -> Samsum:
+        result = self.search(query, limit)
+        return parse_func(result) if parse_func else self.parse_all_messages(result)
     
-    @staticmethod
-    def make_request(request_endpoint: str, method: HTTPMethod, auth = None, headers = None, body = None, params = None):
-        if method == HTTPMethod.GET:
-            return requests.get(request_endpoint, headers=headers, auth=auth, params=params)
-        elif method == HTTPMethod.POST:
-            return requests.post(request_endpoint, headers=headers, auth=auth, body=body, params=params)
-        elif method == HTTPMethod.PUT:
-            return requests.put(request_endpoint, headers=headers, auth=auth, body=body, params=params)
-        elif method == HTTPMethod.DELETE:
-            return requests.delete(request_endpoint, headers=headers, auth=auth, params=params)
+    def search(self, query: str, limit=5) -> list[MessageThread]:
+        subreddit = self.client.subreddit("all")
+        results = subreddit.search(query, limit=limit)
+
+        print(results.params)
+
+        for i in results:
+            print(i.title)
+            
+
+        return self.parse_results(results)
+
+    def parse_results(self, results: models.ListingGenerator) -> list[MessageThread]:
+        message_threads = []
+        for submission in results:
+            message_thread = MessageThread(submission.title, submission.selftext)
+            message_threads.append(message_thread)
+        
+        return message_threads
     
-    def search(self, query: str, limit=5):
-        params = {'q': query, 'limit': limit}
-        return self.make_oath_request(request_endpoint=self.base_url + "/subreddits/search", method=HTTPMethod.GET, params=params)
-                     
+    def parse_message(self, messages: list, id: str) -> Samsum:
+        dialogue = ""
+        for message in messages:
+            dialogue += f"{message.author}: {message.body}\n"
+        
+        return Samsum(id, "", dialogue)
+                             
