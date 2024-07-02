@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Telegram } from "../api/SocialAPI";
 import { Samsum } from "../backend-objects/Samsum";
-import { ConversationSummary } from "../api/Summary";
+import { ConversationSummary, TopicAwareSummary } from "../api/Summary";
 import useStore from "../store/store";
 
 export const useFetchTelegramSearch = () => {
@@ -37,7 +37,6 @@ export const useFetchTelegramSearch = () => {
 }
 
 export const useSummarize = (conversations: Samsum[]) => {
-    const { searchQuery,setIsSummarize } = useStore()
     const [summary, setSummary] = useState<[Samsum] | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -48,6 +47,28 @@ export const useSummarize = (conversations: Samsum[]) => {
             const summaryAPI = new ConversationSummary(conversations)
             const summary = await summaryAPI.getSummary();
             setSummary(summary);
+        } catch (err) {
+            setError('Error fetching summary');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return { fetchSummary, summary, loading, error };
+}
+
+export const useTopicAwareSummarize = (dialogue: Samsum) => {
+    const { conversations, setIsSummarize } = useStore();
+    const [summaries, setSummaries] = useState<[Samsum] | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
+    const fetchTopicAwareSummary = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const topicAwareSummaryAPI = new TopicAwareSummary(conversations, dialogue, 10)
+            const summaries = await topicAwareSummaryAPI.getSummary();
+            setSummaries(summaries);
             // Set isSummarize false after summary is performed.
             setIsSummarize(false);
         } catch (err) {
@@ -57,5 +78,5 @@ export const useSummarize = (conversations: Samsum[]) => {
         }
     };
 
-    return { fetchSummary, summary, loading, error };
+    return { fetchTopicAwareSummary, summaries, loading, error };
 }

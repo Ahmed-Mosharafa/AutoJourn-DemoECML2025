@@ -28,10 +28,12 @@ export class ConversationSummary extends Summary {
 }
 
 export class TopicAwareSummary extends Summary {
+    dialogue: Samsum;
     numOfTopics: number;
 
-    constructor(conversations: Samsum[], numOfTopics: number) {
+    constructor(conversations: Samsum[], dialogue: Samsum, numOfTopics: number) {
         super(conversations);
+        this.dialogue = dialogue;
         this.numOfTopics = numOfTopics;
     }
 
@@ -39,6 +41,7 @@ export class TopicAwareSummary extends Summary {
         // Make a POST request to the backend API to get the summary
         let response = await axios.post(backendUrl + '/topic-aware-summarize', {
             conversations: this.conversations,
+            dialogue: this.dialogue,
             num_topics: this.numOfTopics
         })
 
