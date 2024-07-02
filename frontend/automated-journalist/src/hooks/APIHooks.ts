@@ -2,6 +2,10 @@ import { useEffect, useState } from "react";
 import { Telegram } from "../api/SocialAPI";
 import { Samsum } from "../backend-objects/Samsum";
 
+
+const backendUrl = "http://localhost:8787";
+
+
 export const useFetchTelegramSearch = (query: string) => {
     const [data, setData] = useState<[Samsum] | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
@@ -48,7 +52,7 @@ export const useFetchDeltaSummarize = (requestData: SummarizeRequest) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('/delta-summarize', {
+                const response = await fetch(backendUrl + '/delta-summarize', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
