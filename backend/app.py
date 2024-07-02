@@ -41,6 +41,8 @@
 """
 
 import json
+
+from language_detection.lang_detection import LangDetect
 from summarization.delta_summarization.delta_summarization import DeltaSummarization
 from summarization.models.bart import Bart
 from summarization.agents.agent_factory import AgentsFactory
@@ -64,6 +66,7 @@ summarizer_model = Bart(config.Config.SUMMARIZATION_MODEL)
 summarizer_agent = AgentsFactory.get_agent(summarizer_model)
 topic_aware_summarizer = TopicAwareSummarization()
 delta_summarizer = DeltaSummarization()
+lang_detect = LangDetect()
 
 if __name__ != '__main__':
     # App is being run externally (through gunicorn).
@@ -79,8 +82,15 @@ if __name__ != '__main__':
 async def fetch_telegram():
     query = request.args["query"]
     response = await tele_api.get_conversations(query, channel_limit=config.Config.MAX_NUM_OF_TELEGRAM_CHANNELS,
-                                          message_limit=config.Config.MAX_NUM_OF_TELEGRAM_MESSAGES_PER_CHANNEL)
-    return jsonify({"conversations": response})
+                                                message_limit=config.Config.MAX_NUM_OF_TELEGRAM_MESSAGES_PER_CHANNEL)
+    final_response = []
+    for conv in response:
+        try:
+            if lang_detect.is_english(conv['dialogue']):
+                final_response.append(conv)
+        except:
+            continue
+    return jsonify({"conversations": final_response})
 
 
 @app.route('/search', methods=["GET"])
