@@ -13,6 +13,20 @@ abstract class Summary {
     abstract getSummary(): Promise<any>;
 }
 
+export class ConversationSummary extends Summary {
+    constructor(conversations: Samsum[]) {
+        super(conversations);
+    }
+
+    async getSummary(): Promise<any> {
+        let response = await axios.post(backendUrl + '/summarize', {
+            conversations: this.conversations
+        })
+
+        return response.data.summaries;
+    }
+}
+
 export class TopicAwareSummary extends Summary {
     numOfTopics: number;
 
@@ -24,7 +38,7 @@ export class TopicAwareSummary extends Summary {
     async getSummary(): Promise<any> {
         // Make a POST request to the backend API to get the summary
         let response = await axios.post(backendUrl + '/topic-aware-summarize', {
-            conversation_list: this.conversations,
+            conversations: this.conversations,
             num_topics: this.numOfTopics
         })
 

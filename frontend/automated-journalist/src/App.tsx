@@ -27,8 +27,8 @@ function App() {
           <Routes>
             <Route path="/" element={<Feed setSelectedDialogue={setSelectedDialogue} />} />
             <Route path="/feed" element={<Feed setSelectedDialogue={setSelectedDialogue} />} />
-            <Route path="/search" element={<Feed setSelectedDialogue={setSelectedDialogue} isSearch={true}/>} />
-            <Route path="/summary" element={<Summary selectedDialogue={selectedDialogue}/>} />
+            <Route path="/search" element={<Feed setSelectedDialogue={setSelectedDialogue} isSearch={true} />} />
+            <Route path="/summary" element={<Summary selectedDialogue={selectedDialogue} />} />
             <Route path="/settings" element={<Settings />} />
           </Routes>
         </div>
