@@ -72,7 +72,10 @@ class Bart(SummarizationModel):
         text_chunks = self.__chunk_single_conversation(conv_tweets_list[0], max_length=1024)
         chunk_summaries = []
         for i, chunk in enumerate(text_chunks):
-            chunk_summary = self.model(chunk, min_length=1, max_length=128)
+            try:
+                chunk_summary = self.model(chunk, min_length=1, max_length=128)
+            except:
+                continue
             chunk_summaries.append(chunk_summary)
             self.log.info("Summarized chunk number {}".format(i))
 
