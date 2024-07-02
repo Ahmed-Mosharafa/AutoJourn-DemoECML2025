@@ -60,17 +60,21 @@ class Bart(SummarizationModel):
 
         return chunks
 
+    def __chunk_single_conversation(self, conversation: str, max_length=1024) -> str:
+        chunks = []
+        for i in range(0, len(conversation), max_length):
+            chunk = conversation[i:i + max_length]
+            chunks.append(chunk)
+        return chunks
+
     def summarize(self, conv_tweets_list):
         conv_tweets_list = [self.preprocess(tweet) for tweet in conv_tweets_list]
-        text_chunks = self.__chunk_conversation(conv_tweets_list)
+        text_chunks = self.__chunk_single_conversation(conv_tweets_list[0], max_length=1024)
         chunk_summaries = []
-
         for i, chunk in enumerate(text_chunks):
-            num_tokens = len(self._tokenizer.encode(chunk, truncation=False, max_length=None, return_tensors='pt')[0])
-            chunk_summary = self.model(chunk, min_length=int(0.1 * num_tokens),
-                                       max_length=int(0.5 * num_tokens))
+            chunk_summary = self.model(chunk, min_length=1, max_length=128)
             chunk_summaries.append(chunk_summary)
-            self.log.info("Summarized chuck number {}".format(i))
+            self.log.info("Summarized chunk number {}".format(i))
 
         chunks_summaries = [chunk_summary[0]["summary_text"] for chunk_summary in chunk_summaries]
         summary = ''.join(chunks_summaries)

@@ -18,7 +18,7 @@ class Agent(ABC):
         for conv_dict in conv_list:
             conv_root = conv_dict['dialogue']
             conv_id = conv_dict['id']
-            conv_summary = self.run_conv(conv_root)
+            conv_summary = self.run_conv([conv_root])
             summaries.append({'id': conv_id, 'summary': conv_summary})
 
         return summaries
