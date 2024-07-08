@@ -1,6 +1,7 @@
 import json
 from summarization.models.samsum import Samsum, MessageThread
 
+
 class SocialAPI:
     def __init__(self):
         pass
@@ -21,4 +22,3 @@ class SocialAPI:
         with open(filename, 'w', encoding='utf-8') as file:
             json.dump(self.parse_all_messages_json(
                 result), file, ensure_ascii=False)
-            

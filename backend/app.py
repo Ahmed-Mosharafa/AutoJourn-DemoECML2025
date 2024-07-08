@@ -81,14 +81,16 @@ if __name__ != '__main__':
 async def fetch_telegram():
     query = request.args["query"]
     response = await tele_api.get_conversations(query, channel_limit=config.Config.MAX_NUM_OF_TELEGRAM_CHANNELS,
-                                          message_limit=config.Config.MAX_NUM_OF_TELEGRAM_MESSAGES_PER_CHANNEL)
+                                                message_limit=config.Config.MAX_NUM_OF_TELEGRAM_MESSAGES_PER_CHANNEL)
     return jsonify({"conversations": response})
+
 
 @app.route('/search-reddit', methods=["GET"])
 def fetch_reddit():
     query = request.args["query"]
-    response = reddit_api.search(query, limit=5)
+    response = reddit_api.get_conversations(query, limit=5)
     return jsonify({"conversations": response})
+
 
 @app.route('/search', methods=["GET"])
 def fetch_conversations():
@@ -106,9 +108,11 @@ def fetch_topics():
     # Update topic count if necessary.
     bertopic.check_topic_count(num_topics)
     if config.Config.TOPIC_PER_TWEET:
-        conv_topic_probs, topics = bertopic.run_tweet_topic_modeling(conversation_list)
+        conv_topic_probs, topics = bertopic.run_tweet_topic_modeling(
+            conversation_list)
     else:
-        conv_topic_probs, topics = bertopic.run_con_topic_modeling(conversation_list)
+        conv_topic_probs, topics = bertopic.run_con_topic_modeling(
+            conversation_list)
 
     return jsonify({"topics": conv_topic_probs, "index_to_topic": topics})
 
@@ -126,7 +130,8 @@ def topic_aware_summarize():
     num_topics = int(request.json["num_topics"])
     # Update topic count if necessary.
     bertopic.check_topic_count(num_topics)
-    topics_df, topic_embeddings = bertopic.get_topic_embeddings(conversation_list)
+    topics_df, topic_embeddings = bertopic.get_topic_embeddings(
+        conversation_list)
     dict_topic_sentences = topic_aware_summarizer.extract_topic_sentences(conversation_list[:2], topics_df,
                                                                           topic_embeddings)
     conv_summaries = summarizer_agent.run_all_topic_aware(dict_topic_sentences)
