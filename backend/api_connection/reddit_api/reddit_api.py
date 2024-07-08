@@ -24,18 +24,25 @@ class RedditAPI(SocialAPI):
         return parse_func(result) if parse_func else self.parse_all_messages_json(result)
 
     def search(self, query: str, limit=5) -> list[MessageThread]:
-        subreddit = self.client.subreddit("all")
-        results = subreddit.search(query, limit=limit)
+        reddit = self.client.subreddit("all")
+        subreddit = self.client.subreddit(query)
+        
+        resultsAll = reddit.search(query, limit=limit)
+        resultSubreddit = subreddit.search(query, limit=limit)
 
-        return self.parse_results(results)
+        results = list(resultsAll) + list(resultSubreddit)
+
+        return self.get_message_threads(results)
 
     def get_message_threads(self, results) -> list[MessageThread]:
         message_threads = []
         for submission in results:
             comments = self.extract_comments(submission)
 
-            message_thread = MessageThread(
-                submission.author, submission.title)
+            # the post title as the first comment of the post
+            first_comment = models.Comment(submission, submission.title)
+            comments.insert(0, first_comment)
+            message_thread = MessageThread(submission.id, comments)
             message_threads.append(message_thread)
 
         return message_threads
@@ -49,9 +56,8 @@ class RedditAPI(SocialAPI):
 
         return message_threads
 
-    def extract_comments(self, submission: models.Submission) -> MessageThread:
-        submission.comments.replace_more(limit=None)
-        return MessageThread(submission.author, submission.comments.list())
+    def extract_comments(self, submission: models.Submission, comment_limits=15) -> list:
+        return submission.comments.list()[:comment_limits]
 
     def parse_message_json(self, messages: list, id: str) -> dict:
         return self.parse_message(messages, id).to_json()
@@ -59,6 +65,9 @@ class RedditAPI(SocialAPI):
     def parse_message(self, messages: list, id: str) -> Samsum:
         dialogue = ""
         for message in messages:
-            dialogue += f"{message.author}: {message.body}\n"
+            try:
+                dialogue += f"{message.author}: {message.body}\n"
+            except Exception:
+                dialogue += f"{message._reddit.author}: {message._reddit.title}\n"
 
         return Samsum(id, "", dialogue)
