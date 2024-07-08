@@ -41,6 +41,8 @@
 """
 
 import json
+
+from language_detection.lang_detection import LangDetect
 from summarization.delta_summarization.delta_summarization import DeltaSummarization
 from summarization.models.bart import Bart
 from summarization.agents.agent_factory import AgentsFactory
@@ -64,6 +66,7 @@ summarizer_model = Bart(config.Config.SUMMARIZATION_MODEL)
 summarizer_agent = AgentsFactory.get_agent(summarizer_model)
 topic_aware_summarizer = TopicAwareSummarization()
 delta_summarizer = DeltaSummarization()
+lang_detect = LangDetect()
 
 if __name__ != '__main__':
     # App is being run externally (through gunicorn).
@@ -79,8 +82,15 @@ if __name__ != '__main__':
 async def fetch_telegram():
     query = request.args["query"]
     response = await tele_api.get_conversations(query, channel_limit=config.Config.MAX_NUM_OF_TELEGRAM_CHANNELS,
-                                          message_limit=config.Config.MAX_NUM_OF_TELEGRAM_MESSAGES_PER_CHANNEL)
-    return jsonify({"conversations": response})
+                                                message_limit=config.Config.MAX_NUM_OF_TELEGRAM_MESSAGES_PER_CHANNEL)
+    final_response = []
+    for conv in response:
+        try:
+            if lang_detect.is_english(conv['dialogue']):
+                final_response.append(conv)
+        except:
+            continue
+    return jsonify({"conversations": final_response})
 
 
 @app.route('/search', methods=["GET"])
@@ -109,18 +119,19 @@ def fetch_topics():
 @app.route('/summarize', methods=["POST"])
 def fetch_summaries():
     conversation_list = request.json["conversations"]
-    conv_summary_dict = summarizer_agent.run_all(conversation_list)
-    return jsonify({"summaries": conv_summary_dict})
+    conv_summaries = summarizer_agent.run_all(conversation_list)
+    return jsonify({"summaries": conv_summaries})
 
 
 @app.route('/topic-aware-summarize', methods=["POST"])
 def topic_aware_summarize():
     conversation_list = request.json["conversations"]
+    dialogue_to_summarize = request.json["dialogue"]
     num_topics = int(request.json["num_topics"])
     # Update topic count if necessary.
     bertopic.check_topic_count(num_topics)
     topics_df, topic_embeddings = bertopic.get_topic_embeddings(conversation_list)
-    dict_topic_sentences = topic_aware_summarizer.extract_topic_sentences(conversation_list[:2], topics_df,
+    dict_topic_sentences = topic_aware_summarizer.extract_topic_sentences([dialogue_to_summarize], topics_df,
                                                                           topic_embeddings)
     conv_summaries = summarizer_agent.run_all_topic_aware(dict_topic_sentences)
     return jsonify({"conv_summaries": conv_summaries})
