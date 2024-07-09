@@ -4,6 +4,7 @@ from umap import UMAP
 from sentence_transformers import SentenceTransformer
 import re
 import numpy as np
+import pandas as pd
 
 
 class Bertopic(TopicModeling):
@@ -17,12 +18,36 @@ class Bertopic(TopicModeling):
 
     def __init__(self, num_topics: int):
         self.num_topics = num_topics
+        self.topics_list = [
+        "Sports",
+        "Politics",
+        "Beauty and Fashion",
+        "Movies and Entertainment",
+        "Music",
+        "Technology",
+        "Health and Fitness",
+        "Travel and Tourism",
+        "Food and Cooking",
+        "Literature",
+        "Science",
+        "History",
+        "Education",
+        "Art and Culture",
+        "Finance and Economy",
+        "Personal Development",
+        "Relationships and Family",
+        "Home and Garden",
+        "Automobiles",
+        "Gaming"
+        ]
+        self.static_topics_df = None 
+        self.static_topic_embeddings = None
         umap_model = UMAP(n_neighbors=15,
                           transform_seed=173,  # fix a seed to avoid randomization in UMAP (we use a prime number)
                           n_components=5,
                           min_dist=0.0,
                           metric='cosine')
-        sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
+        self.sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
         self.model = BERTopic(nr_topics=None,
                               language="multilingual",  # Use multilingual sentence-tranformers embedding model
                               top_n_words=5,
@@ -30,7 +55,8 @@ class Bertopic(TopicModeling):
                               verbose=True,
                               n_gram_range=(1, 1),
                               umap_model=umap_model,
-                              embedding_model=sentence_model)
+                              embedding_model=self.sentence_model)
+        self.set_static_topics()
 
     def get_topics(self, docs):
         topics, probs = self.model.fit_transform(docs)  # fit the model to compute the topics
@@ -46,7 +72,17 @@ class Bertopic(TopicModeling):
         topics_df = topics_df[topics_df["Topic"] != -1]
         # new_probs has the same shape as probs. We will remove the columns of reduced topics (has zero probability)
         new_probs = np.apply_along_axis(lambda doc_prob: doc_prob[:len(topics_df)], axis=1, arr=probs)
+        
         return topics_df, new_probs, topic_embeddings
+    
+    def set_static_topics(self):
+        topics_df = pd.DataFrame(self.topics_list, columns=["Name"])
+        topic_embeddings = self.sentence_model.encode(self.topics_list)
+        topic_embeddings = np.array(topic_embeddings, dtype=np.float64)
+        self.static_topics_df, self.static_topic_embeddings =  topics_df, topic_embeddings
+
+    def get_static_topics(self):
+        return self.static_topics_df, self.static_topic_embeddings
 
     def preprocess(self, tweet):
         t_tweet = re.sub(r"http\S+", "", tweet)  # remove links
