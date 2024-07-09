@@ -23,9 +23,6 @@ function App() {
           <Logo />
           <Menu />
         </div>
-        <div className="right-layout">
-          <HotTopics />
-        </div>
         <div className="content">
           <Routes>
             <Route path="/" element={<Feed setSelectedDialogue={setSelectedDialogue} />} />
