@@ -24,7 +24,11 @@ class RedditAPI(SocialAPI):
 
     def search(self, query: str, limit=5) -> list[MessageThread]:
         reddit = self.client.subreddit("all")
-        subreddit = self.client.subreddit(query)
+
+        # parse query for subreddit, there should be no space. Replace space with ''
+        subreddit_name = query.replace(" ", "")
+
+        subreddit = self.client.subreddit(subreddit_name)
 
         resultsAll = reddit.search(query, limit=limit)
         resultSubreddit = subreddit.search(query, limit=limit)

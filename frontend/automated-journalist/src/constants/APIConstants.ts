@@ -1,5 +1,5 @@
 export enum APIConstants {
-    REDDIT,
-    TELEGRAM,
-    TWITTER
+    REDDIT = "Reddit",
+    TELEGRAM = "Telegram",
+    TWITTER = "Twitter",
 }

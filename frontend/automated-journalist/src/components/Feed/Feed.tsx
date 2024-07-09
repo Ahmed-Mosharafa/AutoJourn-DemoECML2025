@@ -26,7 +26,7 @@ export function Feed({ setSelectedDialogue, isSearch }: FeedProps) {
   const { data: conversationResponse, loading, error } = useFetchSearch(selectedAPI);
   
   const title = "Topic: ";
-  let time = "Fetched: 3 min ago";
+  let source = `Using ${selectedAPI} API`;
   const buttonText = "Summarize Text";
 
   const summarizeText = () => {
@@ -65,7 +65,7 @@ export function Feed({ setSelectedDialogue, isSearch }: FeedProps) {
           <div className="topic-title">{title}</div>
           <div className="topic">{searchQuery}</div>
         </div>
-        <div className="fetch-time">{time}</div>
+        <div className="fetch-time">{source}</div>
         <div className="dialogue-list">
           {(conversations ?? []).map((samsum, index) => (
             <div
