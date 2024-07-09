@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { ApiSelectorItem } from "../ApiSelectorItem/ApiSelectorItem";
 import "./ApiSelector.css";
-import { API } from "../../../../api/APIEnums";
+import { APIConstants } from "../../../../constants/APIConstants";
 
 interface ApiSelectorProps {
-  setSelectedAPI: (api: API) => void;
+  setSelectedAPI: (api: APIConstants) => void;
 }
 
 export function ApiSelector(props: ApiSelectorProps) {
@@ -12,23 +12,23 @@ export function ApiSelector(props: ApiSelectorProps) {
   const [isReddit, setIsReddit] = useState(false);
   const [isTelegram, setIsTelegram] = useState(false);
 
-  function selectAPI(api: string) {
+  function selectAPI(api: APIConstants) {
     setIsTwitter(false);
     setIsReddit(false);
     setIsTelegram(false);
 
     switch (api) {
-      case API.TWITTER:
+      case APIConstants.TWITTER:
         setIsTwitter(true);
-        props.setSelectedAPI(API.TWITTER);
+        props.setSelectedAPI(APIConstants.TWITTER);
         break;
-      case API.REDDIT:
+      case APIConstants.REDDIT:
         setIsReddit(true);
-        props.setSelectedAPI(API.REDDIT);
+        props.setSelectedAPI(APIConstants.REDDIT);
         break;
-      case API.TELEGRAM:
+      case APIConstants.TELEGRAM:
         setIsTelegram(true);
-        props.setSelectedAPI(API.TELEGRAM);
+        props.setSelectedAPI(APIConstants.TELEGRAM);
         break;
     }
   }
@@ -39,17 +39,17 @@ export function ApiSelector(props: ApiSelectorProps) {
         <ApiSelectorItem
           text="Twitter"
           isSelected={isTwitter}
-          onClick={() => selectAPI(API.TWITTER)}
+          onClick={() => selectAPI(APIConstants.TWITTER)}
         />
         <ApiSelectorItem
           text="Reddit"
           isSelected={isReddit}
-          onClick={() => selectAPI(API.REDDIT)}
+          onClick={() => selectAPI(APIConstants.REDDIT)}
         />
         <ApiSelectorItem
           text="Telegram"
           isSelected={isTelegram}
-          onClick={() => selectAPI(API.TELEGRAM)}
+          onClick={() => selectAPI(APIConstants.TELEGRAM)}
         />
       </div>
     </>
