@@ -32,6 +32,13 @@ class Config:
     TELEGRAM_PHONE_NUMBER = ""
     TELEGRAM_PASSWORD = ""
 
+    # Reddit API config
+    REDDIT_API_ID = ""
+    REDDIT_API_SECRET = ""
+    REDDIT_USERNAME = ""
+    REDDIT_PASSWORD = ""
+    REDDIT_APP_NAME = ""
+
 
 config_vars = {config: t for config, t in vars(
     Config).items() if not config.startswith('__')}
