@@ -56,7 +56,7 @@ export const useFetchSearch = (apiConstant: APIConstants) => {
 }
 
 
-interface SummarizeRequest {
+export interface SummarizeRequest {
     summaries: {
         [key: string]: string;
     };
@@ -121,7 +121,7 @@ export const useSummarize = (conversations: Samsum[]) => {
     return { fetchSummary, summary, loading, error };
 }
 
-interface TopicAwareSummaryType {
+export interface TopicAwareSummaryType {
     [key: string]: string;
 }
 

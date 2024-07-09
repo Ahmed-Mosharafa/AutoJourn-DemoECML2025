@@ -6,14 +6,15 @@ import { useSummarize, useTopicAwareSummarize } from "../../hooks/APIHooks";
 import CircularLoader from "../common/Loader/CircularLoader";
 import useStore from "../../store/store";
 import { CompareSummariesDialog } from "../common/CompareSummariesDialog/CompareSummariesDialog";
+import { SummaryModel } from "./models/Summary";
 
 
 interface SummaryProps {
   selectedDialogue: Samsum | null;
-  selectedCompareTopic1: string;
-  selectedCompareTopic2: string;
-  setSelectedCompareTopic1: React.Dispatch<React.SetStateAction<string>>
-  setSelectedCompareTopic2: React.Dispatch<React.SetStateAction<string>>
+  selectedCompareTopic1: SummaryModel;
+  selectedCompareTopic2: SummaryModel;
+  setSelectedCompareTopic1: React.Dispatch<React.SetStateAction<SummaryModel>>
+  setSelectedCompareTopic2: React.Dispatch<React.SetStateAction<SummaryModel>>
 }
 
 export function Summary({ selectedDialogue, selectedCompareTopic1, selectedCompareTopic2, setSelectedCompareTopic1, setSelectedCompareTopic2 }: SummaryProps) {
@@ -91,7 +92,7 @@ export function Summary({ selectedDialogue, selectedCompareTopic1, selectedCompa
       <div className="button-area">
         <button className="compare-summaries-button" onClick={openDialog}>{buttonText}</button>
       </div>
-      <CompareSummariesDialog dialogOpen={dialogOpen} closeDialog={closeDialog} selectedCompareTopic1={selectedCompareTopic1} selectedCompareTopic2={selectedCompareTopic2} summaryTopicList={summaryTopicList} setSelectedCompareTopic1={setSelectedCompareTopic1} setSelectedCompareTopic2={setSelectedCompareTopic2} />
+      <CompareSummariesDialog dialogOpen={dialogOpen} closeDialog={closeDialog} selectedCompareTopic1={selectedCompareTopic1} selectedCompareTopic2={selectedCompareTopic2} summaryTopicList={topicAwareSummaries ?? {}} setSelectedCompareTopic1={setSelectedCompareTopic1} setSelectedCompareTopic2={setSelectedCompareTopic2} />
     </div>
     <div className="divider" />
   </>;

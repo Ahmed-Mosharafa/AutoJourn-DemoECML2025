@@ -13,8 +13,8 @@ import {CompareSummaries} from "./components/CompareSummaries/CompareSummaries";
 function App() {
   const [selectedDialogue, setSelectedDialogue] = useState<Samsum | null>(null);
 
-  const [selectedCompareTopic1, setSelectedCompareTopic1] = useState('');
-  const [selectedCompareTopic2, setSelectedCompareTopic2] = useState('');
+  const [selectedCompareTopic1, setSelectedCompareTopic1] = useState({title: "", content: ""});
+  const [selectedCompareTopic2, setSelectedCompareTopic2] = useState({title: "", content: ""});
 
   return (
     <>
