@@ -1,6 +1,5 @@
 import praw
 import config as config
-from enum import Enum
 from summarization.models.samsum import Samsum, MessageThread
 from api_connection.social_api import SocialAPI
 from praw import models
@@ -26,7 +25,7 @@ class RedditAPI(SocialAPI):
     def search(self, query: str, limit=5) -> list[MessageThread]:
         reddit = self.client.subreddit("all")
         subreddit = self.client.subreddit(query)
-        
+
         resultsAll = reddit.search(query, limit=limit)
         resultSubreddit = subreddit.search(query, limit=limit)
 
