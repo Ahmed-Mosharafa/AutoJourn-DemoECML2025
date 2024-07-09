@@ -121,9 +121,14 @@ export const useSummarize = (conversations: Samsum[]) => {
     return { fetchSummary, summary, loading, error };
 }
 
+interface TopicAwareSummaryType {
+    [key: string]: string;
+}
+
+
 export const useTopicAwareSummarize = (dialogue: Samsum) => {
     const { conversations, setIsSummarize } = useStore();
-    const [summaries, setSummaries] = useState<[Samsum] | null>(null);
+    const [summaries, setSummaries] = useState<TopicAwareSummaryType | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const fetchTopicAwareSummary = async () => {

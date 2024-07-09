@@ -39,16 +39,12 @@ class TopicAwareSummarization:
 
         return dict_topic_sentences
 
-    def extract_topic_sentences(self, conv_docs, topics_df, topic_embeddings):
+    def extract_topic_sentences(self, conv_doc, topics_df, topic_embeddings):
         sent_transf_model_utils_obj = SentTransfUtilities(model_name=self.sentence_transformer_model)
         # Topic sentence matrix for each conversation.
-        topic_sentence_matrices = []
-        for conv in conv_docs:
-            data_sentences = self.text_to_sentences(conv['dialogue'])
-            sentence_embed, list_sentences = self.preprocess(data_sentences, sent_transf_model_utils_obj)
-            dict_topic_sentences = self.compute_similarity_matrix(sentence_embed, list_sentences,
-                                                                  sent_transf_model_utils_obj, topic_embeddings,
-                                                                  topics_df)
-            dict_topic_sentences['id'] = conv['id']
-            topic_sentence_matrices.append(dict_topic_sentences)
-        return topic_sentence_matrices
+        data_sentences = self.text_to_sentences(conv_doc['dialogue'])
+        sentence_embed, list_sentences = self.preprocess(data_sentences, sent_transf_model_utils_obj)
+        dict_topic_sentences = self.compute_similarity_matrix(sentence_embed, list_sentences,
+                                                              sent_transf_model_utils_obj, topic_embeddings,
+                                                              topics_df)
+        return dict_topic_sentences
