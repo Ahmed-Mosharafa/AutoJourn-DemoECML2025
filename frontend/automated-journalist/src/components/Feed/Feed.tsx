@@ -4,9 +4,10 @@ import "./Feed.css";
 import { SearchBar } from "../common/SearchBar/SearchBar";
 import { useNavigate } from "react-router-dom";
 import { Samsum } from "../../backend-objects/Samsum";
-import { useFetchTelegramSearch } from "../../hooks/APIHooks";
+import { useFetchSearch } from "../../hooks/APIHooks";
 import CircularLoader from "../common/Loader/CircularLoader";
 import useStore from "../../store/store";
+import { APIConstants } from "../../constants/APIConstants";
 
 interface FeedProps {
   setSelectedDialogue: React.Dispatch<React.SetStateAction<Samsum | null>>;
@@ -20,9 +21,9 @@ Feed.defaultProps = {
 export function Feed({ setSelectedDialogue, isSearch }: FeedProps) {
   const navigate = useNavigate();
   const { searchQuery, setSearchQuery, setIsSummarize, conversations } = useStore();
-  const [selectedAPI, setSelectedAPI] = useState("");
+  const [selectedAPI, setSelectedAPI] = useState(APIConstants.REDDIT);
   const [selectedDialogueIndex, setselectedDialogueIndex] = useState(-1);
-  const { data: conversationResponse, loading, error } = useFetchTelegramSearch();
+  const { data: conversationResponse, loading, error } = useFetchSearch(selectedAPI);
   
   const title = "Topic: ";
   let time = "Fetched: 3 min ago";

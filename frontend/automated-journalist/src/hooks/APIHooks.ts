@@ -1,14 +1,30 @@
 import { useEffect, useState } from "react";
-import { Telegram } from "../api/SocialAPI";
+import { Reddit, SocialAPI, Telegram } from "../api/SocialAPI";
 import { Samsum } from "../backend-objects/Samsum";
 import { ConversationSummary, TopicAwareSummary } from "../api/Summary";
 import useStore from "../store/store";
+import { APIConstants } from "../constants/APIConstants";
 
 
 const backendUrl = "http://localhost:8787";
 
+const teleAPI = new Telegram();
+const redditAPI = new Reddit();
 
-export const useFetchTelegramSearch = () => {
+export const pickAPI = (api: APIConstants) => {
+    switch (api) {
+        case APIConstants.TELEGRAM:
+            return teleAPI;
+        case APIConstants.REDDIT:
+            return redditAPI;
+        default:
+            return redditAPI; // Default to Reddit
+    }
+}
+
+export const useFetchSearch = (apiConstant: APIConstants) => {
+    const api = pickAPI(apiConstant);
+
     const { searchQuery, setConversations } = useStore();
     const [data, setData] = useState<[Samsum] | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
@@ -23,8 +39,7 @@ export const useFetchTelegramSearch = () => {
                 return;
             }
             try {
-                const teleAPI = new Telegram();
-                const data = await teleAPI.getFeedData(searchQuery);
+                const data = await api.getFeedData(searchQuery);
                 setData(data);
                 setConversations(data);
                 setLoading(false);
