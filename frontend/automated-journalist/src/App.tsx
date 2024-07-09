@@ -3,13 +3,11 @@ import "./App.css";
 import { Feed } from "./components/Feed/Feed";
 import { Logo } from "./components/common/Logo/Logo";
 import { Menu } from "./components/common/Menu/MenuLayout/Menu";
-import { ApiSelector } from "./components/common/ApiSelector/ApiSelectorLayout/ApiSelector";
 import { HotTopics } from "./components/common/HotTopics/HotTopicsLayout/HotTopics";
 import { Summary } from "./components/Summary/Summary";
 import { Settings } from "./components/Settings/Settings";
 import { useState } from "react";
 import { Samsum } from "./backend-objects/Samsum";
-import {CompareSummariesDialog} from "./components/common/CompareSummariesDialog/CompareSummariesDialog";
 import {CompareSummaries} from "./components/CompareSummaries/CompareSummaries";
 
 function App() {

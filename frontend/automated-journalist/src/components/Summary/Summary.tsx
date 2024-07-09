@@ -1,7 +1,10 @@
 import {Dialog, DialogTitle, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent} from "@mui/material";
 import { Samsum } from "../../backend-objects/Samsum";
 import "./Summary.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSummarize } from "../../hooks/APIHooks";
+import CircularLoader from "../common/Loader/CircularLoader";
+import useStore from "../../store/store";
 import {CompareSummariesDialog} from "../common/CompareSummariesDialog/CompareSummariesDialog";
 
 
@@ -16,11 +19,14 @@ interface SummaryProps {
 export function Summary({selectedDialogue, selectedCompareTopic1, selectedCompareTopic2, setSelectedCompareTopic1, setSelectedCompareTopic2}: SummaryProps) {
   const [selectedSummaryTopic, setSelectedSummaryTopic] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
-
-  const summaryTopicList:string[] = ["Topic 1","Topic 2","Topic 3"]
   const topicSelectTitle = "Topic";
+  const { fetchSummary, summary, loading, error } = useSummarize([selectedDialogue ?? { id: "-1", summary: "", dialogue: "" }])
+  const { searchQuery, isSummarize } = useStore()
+
+  const summaryTopicList = ["Topic 1", "Topic 2", "Topic 3"]
+  
   const topicTitle = "Topic: ";
-  const topic = "US Elections";
+  const topic = searchQuery;
   const summaryTime = "Summarized: 3 min ago";
   const summaryTitle = "Summary";
   const buttonText = "Compare Summaries";
@@ -37,6 +43,15 @@ export function Summary({selectedDialogue, selectedCompareTopic1, selectedCompar
     setDialogOpen(false);
   };
 
+  useEffect(() => {
+    if (isSummarize) {
+      fetchSummary();
+    }
+  }, [isSummarize])
+
+  if (loading) {
+    return <CircularLoader />
+  }
   return <>
     <div className="summary-page">
       <div className="topic-area">
@@ -69,6 +84,8 @@ export function Summary({selectedDialogue, selectedCompareTopic1, selectedCompar
         <button className="compare-summaries-button" onClick={openDialog}>{buttonText}</button>
       </div>
       <CompareSummariesDialog dialogOpen={dialogOpen} closeDialog={closeDialog} selectedCompareTopic1={selectedCompareTopic1} selectedCompareTopic2={selectedCompareTopic2} summaryTopicList={summaryTopicList} setSelectedCompareTopic1={setSelectedCompareTopic1} setSelectedCompareTopic2={setSelectedCompareTopic2}/>
-    </div>
+        {summary?.[0].summary}
+      </div>
+      <div className="divider" />
   </>;
 }

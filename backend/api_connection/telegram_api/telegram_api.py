@@ -2,11 +2,11 @@ from telethon import TelegramClient
 from telethon import functions, types
 import asyncio
 from summarization.models.samsum import Samsum, MessageThread
-import json
 import config as config
+from api_connection.social_api import SocialAPI
 
 
-class TelegramAPI:
+class TelegramAPI(SocialAPI):
     def __init__(self):
         self.client = TelegramClient(
             'nlp_user', config.Config.TELEGRAM_API_ID, config.Config.TELEGRAM_API_HASH)
@@ -71,13 +71,6 @@ class TelegramAPI:
 
         return channels
 
-    def parse_all_messages(self, message_threads: list[MessageThread]) -> list[Samsum]:
-        samsums = []
-        for message_thread in message_threads:
-            samsums.append(self.parse_message(
-                message_thread.messages, message_thread.id))
-        return samsums
-
     def parse_message(self, messages: list[types.Message], id) -> Samsum:
         samsum = Samsum(id, "", "")
         for message in messages:
@@ -90,29 +83,3 @@ class TelegramAPI:
 
     def parse_message_json(self, messages: list[types.Message], id) -> dict:
         return self.parse_message(messages, id).to_json()
-
-    def parse_all_messages_json(self, message_threads: list[MessageThread]) -> list[dict]:
-        return [self.parse_message_json(messages=message_thread.messages, id=message_thread.id) for message_thread in message_threads]
-
-    # for testing purposes
-    def export_query_as_json(self, query: str, channel_limit=5, message_limit=10, filename="results.json") -> None:
-        result = self.query(query, channel_limit, message_limit)
-        with open(filename, 'w', encoding='utf-8') as file:
-            json.dump(self.parse_all_messages_json(
-                result), file, ensure_ascii=False)
-
-
-# def main():
-#     tapi = TelegramAPI("20866665", "9efc05b1e5d0aa89fa195326deff987b")
-#     result = tapi.query("football")
-#     sumsum = tapi.parse_all_messages_json(result)
-
-#     def export_to_json(data, filename):
-#         with open(filename, 'w', encoding='utf-8') as file:
-#             json.dump(data, file, ensure_ascii=False)
-
-#     export_to_json(sumsum, 'first_results_telegram_api.json')
-
-
-# if __name__ == "__main__":
-#     main()
