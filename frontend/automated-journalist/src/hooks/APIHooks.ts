@@ -1,10 +1,30 @@
 import { useEffect, useState } from "react";
-import { Telegram } from "../api/SocialAPI";
+import { Reddit, SocialAPI, Telegram } from "../api/SocialAPI";
 import { Samsum } from "../backend-objects/Samsum";
 import { ConversationSummary, TopicAwareSummary } from "../api/Summary";
 import useStore from "../store/store";
+import { APIConstants } from "../constants/APIConstants";
 
-export const useFetchTelegramSearch = () => {
+
+const backendUrl = "http://localhost:8787";
+
+const teleAPI = new Telegram();
+const redditAPI = new Reddit();
+
+export const pickAPI = (api: APIConstants) => {
+    switch (api) {
+        case APIConstants.TELEGRAM:
+            return teleAPI;
+        case APIConstants.REDDIT:
+            return redditAPI;
+        default:
+            return redditAPI; // Default to Reddit
+    }
+}
+
+export const useFetchSearch = (apiConstant: APIConstants) => {
+    const api = pickAPI(apiConstant);
+
     const { searchQuery, setConversations } = useStore();
     const [data, setData] = useState<[Samsum] | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
@@ -19,8 +39,7 @@ export const useFetchTelegramSearch = () => {
                 return;
             }
             try {
-                const teleAPI = new Telegram();
-                const data = await teleAPI.getFeedData(searchQuery);
+                const data = await api.getFeedData(searchQuery);
                 setData(data);
                 setConversations(data);
                 setLoading(false);
@@ -33,8 +52,53 @@ export const useFetchTelegramSearch = () => {
         fetchData();
     }, [searchQuery]);
 
-    return { data, loading, error };
+    return { data, loading, error};
 }
+
+
+interface SummarizeRequest {
+    summaries: {
+        [key: string]: string;
+    };
+    plot_type: string;
+}
+
+export const useFetchDeltaSummarize = (requestData: SummarizeRequest) => {
+    const [imageSrc, setImageSrc] = useState<string | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await fetch(backendUrl + '/delta-summarize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const imageBlob = await response.blob();
+                const imageObjectURL = URL.createObjectURL(imageBlob);
+                setImageSrc(imageObjectURL);
+                setLoading(false);
+            } catch (error) {
+                setError('Error fetching data');
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [requestData]);
+
+    return { imageSrc, loading, error };
+};
+
 
 export const useSummarize = (conversations: Samsum[]) => {
     const [summary, setSummary] = useState<[Samsum] | null>(null);
