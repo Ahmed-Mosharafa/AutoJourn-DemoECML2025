@@ -10,7 +10,7 @@ class Agent(ABC):
         self.summarizer_model = summarizer_model
 
     @abstractmethod
-    def run_conv(self, conv_root: Dict) -> str:
+    def run_conv(self, conv_root: list) -> str:
         pass
 
     def run_all(self, conv_list: List[Dict[str, List[str]]]) -> Dict[str, str]:
@@ -23,15 +23,10 @@ class Agent(ABC):
 
         return summaries
 
-    def run_all_topic_aware(self, conv_list: List[Dict[str, List[str]]]) -> Dict[str, Dict[str, str]]:
-        conv_summaries = {}  # conversation summaries
-        for conv_dict in conv_list:
-            # Save the conv id.
-            conv_id = conv_dict.pop('id')
-            topic_summaries = {}
-            for topic, sentences in conv_dict.items():
-                conv_summary = self.run_conv(sentences)
-                topic_summaries[topic] = conv_summary
-            conv_summaries[conv_id] = topic_summaries
+    def run_all_topic_aware(self, dict_topic_sentences: Dict[str, List[str]]) -> Dict[str, str]:
+        topic_summaries = {}
+        for topic, sentences in dict_topic_sentences.items():
+            conv_summary = self.run_conv(sentences)
+            topic_summaries[topic] = conv_summary
 
-        return conv_summaries
+        return topic_summaries

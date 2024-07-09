@@ -1,30 +1,30 @@
-import {Dialog, DialogTitle, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent} from "@mui/material";
+import { Dialog, DialogTitle, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent } from "@mui/material";
 import { Samsum } from "../../backend-objects/Samsum";
 import "./Summary.css";
 import { useEffect, useState } from "react";
-import { useSummarize } from "../../hooks/APIHooks";
+import { useSummarize, useTopicAwareSummarize } from "../../hooks/APIHooks";
 import CircularLoader from "../common/Loader/CircularLoader";
 import useStore from "../../store/store";
-import {CompareSummariesDialog} from "../common/CompareSummariesDialog/CompareSummariesDialog";
+import { CompareSummariesDialog } from "../common/CompareSummariesDialog/CompareSummariesDialog";
 
 
 interface SummaryProps {
   selectedDialogue: Samsum | null;
-  selectedCompareTopic1:string;
-  selectedCompareTopic2:string;
+  selectedCompareTopic1: string;
+  selectedCompareTopic2: string;
   setSelectedCompareTopic1: React.Dispatch<React.SetStateAction<string>>
   setSelectedCompareTopic2: React.Dispatch<React.SetStateAction<string>>
 }
 
-export function Summary({selectedDialogue, selectedCompareTopic1, selectedCompareTopic2, setSelectedCompareTopic1, setSelectedCompareTopic2}: SummaryProps) {
-  const [selectedSummaryTopic, setSelectedSummaryTopic] = useState('');
+export function Summary({ selectedDialogue, selectedCompareTopic1, selectedCompareTopic2, setSelectedCompareTopic1, setSelectedCompareTopic2 }: SummaryProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const topicSelectTitle = "Topic";
   const { fetchSummary, summary, loading, error } = useSummarize([selectedDialogue ?? { id: "-1", summary: "", dialogue: "" }])
-  const { searchQuery, isSummarize } = useStore()
-
-  const summaryTopicList = ["Topic 1", "Topic 2", "Topic 3"]
-  
+  const { fetchTopicAwareSummary, summaries: topicAwareSummaries, loading: topicAwareLoading, error: topicAwareError } = useTopicAwareSummarize(selectedDialogue ?? { id: "-1", summary: "", dialogue: "" })
+  const { searchQuery, isSummarize } = useStore();
+  const [selectedSummaryTopic, setSelectedSummaryTopic] = useState("Default");
+  const summaryTopicList = Object.keys(topicAwareSummaries ?? {});
+  summaryTopicList.unshift("Default");
   const topicTitle = "Topic: ";
   const topic = searchQuery;
   const summaryTime = "Summarized: 3 min ago";
@@ -45,12 +45,17 @@ export function Summary({selectedDialogue, selectedCompareTopic1, selectedCompar
 
   useEffect(() => {
     if (isSummarize) {
-      fetchSummary();
+      fetchSummary().then(() => {
+        fetchTopicAwareSummary();
+      });
     }
   }, [isSummarize])
 
-  if (loading) {
+  if (loading || topicAwareLoading) {
     return <CircularLoader />
+  }
+  if (error || topicAwareError) {
+    return <div> {error}</div>
   }
   return <>
     <div className="summary-page">
@@ -60,32 +65,34 @@ export function Summary({selectedDialogue, selectedCompareTopic1, selectedCompar
       </div>
       <div className="summarize-time">{summaryTime}</div>
       <div className="dropdown-area">
-        <FormControl sx={{m: 1, width: 180}}>
+        <FormControl sx={{ m: 1, width: 180 }}>
           <InputLabel id="demo-simple-select-label">{topicSelectTitle}</InputLabel>
           <Select
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
-              value={selectedSummaryTopic}
-              label="Topic"
-              onChange={handleChange}
+            labelId="demo-simple-select-label"
+            id="demo-simple-select"
+            value={selectedSummaryTopic}
+            label="Topic"
+            onChange={handleChange}
           >
             {summaryTopicList.map((summaryTopic) => (
-                <MenuItem value={summaryTopic}>{summaryTopic}</MenuItem>
+              <MenuItem value={summaryTopic}>{summaryTopic}</MenuItem>
             ))}
           </Select>
         </FormControl>
       </div>
       <div className="summary-title">{summaryTitle}</div>
       <div className="summary">
-        {selectedDialogue?.summary}
+        {selectedSummaryTopic !== "Default" ? (topicAwareSummaries ?? {})[selectedSummaryTopic]
+          :
+          summary?.[0].summary
+        }
       </div>
-      <div className="divider"/>
+      <div className="divider" />
       <div className="button-area">
         <button className="compare-summaries-button" onClick={openDialog}>{buttonText}</button>
       </div>
-      <CompareSummariesDialog dialogOpen={dialogOpen} closeDialog={closeDialog} selectedCompareTopic1={selectedCompareTopic1} selectedCompareTopic2={selectedCompareTopic2} summaryTopicList={summaryTopicList} setSelectedCompareTopic1={setSelectedCompareTopic1} setSelectedCompareTopic2={setSelectedCompareTopic2}/>
-        {summary?.[0].summary}
-      </div>
-      <div className="divider" />
+      <CompareSummariesDialog dialogOpen={dialogOpen} closeDialog={closeDialog} selectedCompareTopic1={selectedCompareTopic1} selectedCompareTopic2={selectedCompareTopic2} summaryTopicList={summaryTopicList} setSelectedCompareTopic1={setSelectedCompareTopic1} setSelectedCompareTopic2={setSelectedCompareTopic2} />
+    </div>
+    <div className="divider" />
   </>;
 }
