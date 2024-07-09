@@ -79,7 +79,7 @@ class Bertopic(TopicModeling):
         topics_df = pd.DataFrame(self.topics_list, columns=["Name"])
         topic_embeddings = self.sentence_model.encode(self.topics_list)
         topic_embeddings = np.array(topic_embeddings, dtype=np.float64)
-        self.static_topics_df, self.static_topic_embeddings =  topics_df, topic_embeddings
+        self.static_topics_df, self.static_topic_embeddings = topics_df, topic_embeddings
 
     def get_static_topics(self):
         return self.static_topics_df, self.static_topic_embeddings
