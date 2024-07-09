@@ -2,7 +2,7 @@ import { FormControl, InputLabel, MenuItem, Select, SelectChangeEvent } from "@m
 import { Samsum } from "../../backend-objects/Samsum";
 import "./Summary.css";
 import { useEffect, useState } from "react";
-import { useSummarize } from "../../hooks/APIHooks";
+import { useSummarize, useTopicAwareSummarize } from "../../hooks/APIHooks";
 import CircularLoader from "../common/Loader/CircularLoader";
 import useStore from "../../store/store";
 
@@ -12,9 +12,11 @@ interface SummaryProps {
 
 export function Summary({ selectedDialogue }: SummaryProps) {
   const { fetchSummary, summary, loading, error } = useSummarize([selectedDialogue ?? { id: "-1", summary: "", dialogue: "" }])
-  const { searchQuery, isSummarize } = useStore()
-  const [selectedSummaryTopic, setSelectedSummaryTopic] = useState('');
-  const summaryTopicList = ["Topic 1", "Topic 2", "Topic 3"]
+  const { fetchTopicAwareSummary, summaries: topicAwareSummaries, loading: topicAwareLoading, error: topicAwareError } = useTopicAwareSummarize(selectedDialogue ?? { id: "-1", summary: "", dialogue: "" })
+  const { searchQuery, isSummarize } = useStore();
+  const [selectedSummaryTopic, setSelectedSummaryTopic] = useState("Default");
+  const summaryTopicList = Object.keys(topicAwareSummaries ?? {});
+  summaryTopicList.unshift("Default");
   const handleChange = (event: SelectChangeEvent) => {
     setSelectedSummaryTopic(event.target.value as string);
   };
@@ -27,11 +29,15 @@ export function Summary({ selectedDialogue }: SummaryProps) {
   useEffect(() => {
     if (isSummarize) {
       fetchSummary();
+      fetchTopicAwareSummary();
     }
   }, [isSummarize])
 
-  if (loading) {
+  if (loading || topicAwareLoading) {
     return <CircularLoader />
+  }
+  if (error || topicAwareError) {
+    return <div> {error}</div>
   }
   return <>
     <div className="summary-page">
@@ -58,7 +64,10 @@ export function Summary({ selectedDialogue }: SummaryProps) {
       </div>
       <div className="summary-title">{summaryTitle}</div>
       <div className="summary">
-        {summary?.[0].summary}
+        {selectedSummaryTopic !== "Default" ? (topicAwareSummaries ?? {})[selectedSummaryTopic]
+          :
+          summary?.[0].summary
+        }
       </div>
       <div className="divider" />
     </div>
