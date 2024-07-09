@@ -132,6 +132,11 @@ def topic_aware_summarize():
     bertopic.check_topic_count(num_topics)
     topics_df, topic_embeddings = bertopic.get_topic_embeddings(conversation_list)
     dict_topic_sentences = topic_aware_summarizer.extract_topic_sentences([dialogue_to_summarize], topics_df,
+
+    if len(topic_embeddings < 3):
+        topics_df, topic_embeddings = bertopic.get_static_topics()
+
+    dict_topic_sentences = topic_aware_summarizer.extract_topic_sentences(conversation_list[:2], topics_df,
                                                                           topic_embeddings)
     conv_summaries = summarizer_agent.run_all_topic_aware(dict_topic_sentences)
     return jsonify({"conv_summaries": conv_summaries})
