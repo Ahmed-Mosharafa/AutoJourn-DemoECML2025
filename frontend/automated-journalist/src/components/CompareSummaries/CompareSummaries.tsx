@@ -1,5 +1,3 @@
-import scatterPlot from '../../assets/scatter_plot.png';
-import cosineSimilarityMatrix from '../../assets/cosine_similarity_matrix.png';
 import {FormControlLabel, Switch} from "@mui/material";
 import "./CompareSummaries.css"
 import {useState} from "react";
