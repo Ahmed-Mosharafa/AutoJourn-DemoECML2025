@@ -1,6 +1,5 @@
 from transformers import pipeline, AutoTokenizer
 from typing import List
-
 from summarization.models.summarizer import SummarizationModel
 import re
 import logging

@@ -47,10 +47,13 @@ class DeltaSummarization:
         plt.close()
         return img_buffer
 
-    def create_2d_scatter_plot(self, img_buffer, topic_summaries: Dict[str, str]):
+    def create_2d_scatter_plot(self, img_buffer, topic_summaries: Dict[str, str],
+                               dialogue: str, default_summary: str):
         pca = PCA(n_components=2)
         topics = list(topic_summaries.keys())
+        topics.extend(['Original Dialogue', 'Default Summary'])
         summaries = list(topic_summaries.values())
+        summaries.extend([dialogue, default_summary])
         summary_embeddings = self.model.encode(summaries)
         summary_embeddings_2d = pca.fit_transform(summary_embeddings)
         # Scatter plot
@@ -65,11 +68,12 @@ class DeltaSummarization:
         plt.close()
         return img_buffer
 
-    def send_plot(self, plot_type: str, topic_summaries: Dict[str, str]):
+    def send_plot(self, plot_type: str, topic_summaries: Dict[str, str],
+                  dialogue: str, default_summary: str):
         img_buffer = io.BytesIO()
         if plot_type == 'cosine_similarity':
             img_buffer = self.create_cosine_similarity_matrix(img_buffer, topic_summaries)
         elif plot_type == '2d_scatter_plot':
-            img_buffer = self.create_2d_scatter_plot(img_buffer, topic_summaries)
+            img_buffer = self.create_2d_scatter_plot(img_buffer, topic_summaries, dialogue, default_summary)
 
         return img_buffer
