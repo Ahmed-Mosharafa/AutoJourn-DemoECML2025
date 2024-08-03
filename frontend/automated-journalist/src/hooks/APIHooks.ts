@@ -52,7 +52,7 @@ export const useFetchSearch = (apiConstant: APIConstants) => {
         fetchData();
     }, [searchQuery]);
 
-    return { data, loading, error};
+    return { data, loading, error };
 }
 
 
@@ -61,6 +61,8 @@ export interface SummarizeRequest {
         [key: string]: string;
     };
     plot_type: string;
+    dialogue: string;
+    default_summary: string;
 }
 
 export const useFetchDeltaSummarize = (requestData: SummarizeRequest) => {
@@ -100,17 +102,20 @@ export const useFetchDeltaSummarize = (requestData: SummarizeRequest) => {
 };
 
 
-export const useSummarize = (conversations: Samsum[]) => {
+export const useSummarize = () => {
     const [summary, setSummary] = useState<[Samsum] | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const { conversations, setDefaultSummary } = useStore();
     const fetchSummary = async () => {
         setLoading(true);
         setError(null);
         try {
             const summaryAPI = new ConversationSummary(conversations)
-            const summary = await summaryAPI.getSummary();
-            setSummary(summary);
+            const summaryRes = await summaryAPI.getSummary();
+            setSummary(summaryRes);
+            // Default summary saved in the store for delta summarization.
+            setDefaultSummary(summaryRes[0]?.summary);
         } catch (err) {
             setError('Error fetching summary');
         } finally {
