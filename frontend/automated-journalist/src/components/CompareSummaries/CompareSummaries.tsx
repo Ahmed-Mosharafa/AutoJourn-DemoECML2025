@@ -53,8 +53,6 @@ export function CompareSummaries({ selectedCompareTopic1, selectedCompareTopic2,
         else {
             setSwitchLabel(graphTypes[1]);
             data.plot_type = 'cosine_similarity';
-            data.default_summary = '';
-            data.dialogue = '';
             setRequestData(data);
         }
     };
