@@ -1,16 +1,17 @@
 import {Dialog, DialogTitle, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent} from "@mui/material";
-import {useState} from "react";
 import {useNavigate} from "react-router-dom";
+import { SummaryModel } from "../../Summary/models/Summary";
+import { TopicAwareSummaryType } from "../../../hooks/APIHooks";
 
 
 interface SummaryProps {
     dialogOpen:boolean;
     closeDialog: ()=>void;
-    selectedCompareTopic1:string;
-    selectedCompareTopic2:string;
-    summaryTopicList:string[];
-    setSelectedCompareTopic1: React.Dispatch<React.SetStateAction<string>>
-    setSelectedCompareTopic2: React.Dispatch<React.SetStateAction<string>>
+    selectedCompareTopic1:SummaryModel;
+    selectedCompareTopic2:SummaryModel;
+    summaryTopicList:TopicAwareSummaryType;
+    setSelectedCompareTopic1: React.Dispatch<React.SetStateAction<SummaryModel>>
+    setSelectedCompareTopic2: React.Dispatch<React.SetStateAction<SummaryModel>>
 }
 
 export function CompareSummariesDialog({dialogOpen, closeDialog, selectedCompareTopic1,selectedCompareTopic2,summaryTopicList,setSelectedCompareTopic1,setSelectedCompareTopic2}:SummaryProps)
@@ -19,10 +20,14 @@ export function CompareSummariesDialog({dialogOpen, closeDialog, selectedCompare
     const topicSelectTitle = "Topic";
 
     const selectCompareTopic1 = (event: SelectChangeEvent) => {
-        setSelectedCompareTopic1(event.target.value as string);
+        let selectedTopic = event.target.value as string;
+        let selectedTopicValue = summaryTopicList[selectedTopic];
+        setSelectedCompareTopic1({title: selectedTopic, content: selectedTopicValue});
     }
     const selectCompareTopic2 = (event: SelectChangeEvent) => {
-        setSelectedCompareTopic2(event.target.value as string);
+        let selectedTopic = event.target.value as string;
+        let selectedTopicValue = summaryTopicList[selectedTopic];
+        setSelectedCompareTopic2({title: selectedTopic, content: selectedTopicValue});
     }
 
     const compareSummaries = () => {
@@ -30,11 +35,11 @@ export function CompareSummariesDialog({dialogOpen, closeDialog, selectedCompare
     }
 
     const getSummaryTopicList = (selectedCompareTopic:string | undefined):string[] | undefined => {
-        if(selectedCompareTopic==selectedCompareTopic1){
-            return summaryTopicList.filter(topic => topic !== selectedCompareTopic2);
+        if(selectedCompareTopic==selectedCompareTopic1.title){
+            return Object.keys(summaryTopicList).filter(topic => topic !== selectedCompareTopic2.title);
         }
-        if(selectedCompareTopic==selectedCompareTopic2){
-            return summaryTopicList.filter(topic => topic !== selectedCompareTopic1);
+        if(selectedCompareTopic==selectedCompareTopic2.title){
+            return Object.keys(summaryTopicList).filter(topic => topic !== selectedCompareTopic1.title);
         }
     };
 
@@ -47,12 +52,12 @@ export function CompareSummariesDialog({dialogOpen, closeDialog, selectedCompare
                     <InputLabel id="demo-simple-select-label">{topicSelectTitle}</InputLabel>
                     <Select
                         labelId="demo-simple-select-label"
-                        id="demo-simple-select"
-                        value={selectedCompareTopic1}
+                        id={selectedCompareTopic1.title}
+                        value={selectedCompareTopic1.title}
                         label="Topic"
                         onChange={selectCompareTopic1}
                     >
-                        {getSummaryTopicList(selectedCompareTopic1)?.map((summaryTopic) => (
+                        {getSummaryTopicList(selectedCompareTopic1.title)?.map((summaryTopic) => (
                             <MenuItem value={summaryTopic}>{summaryTopic}</MenuItem>
                         ))}
                     </Select>
@@ -62,18 +67,18 @@ export function CompareSummariesDialog({dialogOpen, closeDialog, selectedCompare
                     <InputLabel id="demo-simple-select-label">{topicSelectTitle}</InputLabel>
                     <Select
                         labelId="demo-simple-select-label"
-                        id="demo-simple-select"
-                        value={selectedCompareTopic2}
+                        id={selectedCompareTopic2.title}
+                        value={selectedCompareTopic2.title}
                         label="Topic"
                         onChange={selectCompareTopic2}
                     >
-                        {getSummaryTopicList(selectedCompareTopic2)?.map((summaryTopic) => (
+                        {getSummaryTopicList(selectedCompareTopic2.title)?.map((summaryTopic) => (
                             <MenuItem value={summaryTopic}>{summaryTopic}</MenuItem>
                         ))}
                     </Select>
                 </FormControl>
                 <div>
-                    <button className="compare-button" disabled={selectedCompareTopic1=='' || selectedCompareTopic2==''} onClick={compareSummaries}>Compare</button>
+                    <button className="compare-button" disabled={selectedCompareTopic1.title=='' || selectedCompareTopic2.title==''} onClick={compareSummaries}>Compare</button>
                 </div>
             </div>
         </Dialog>

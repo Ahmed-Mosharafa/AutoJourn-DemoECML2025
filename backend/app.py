@@ -156,7 +156,9 @@ def topic_aware_summarize():
 def delta_summarize():
     summaries = request.json["summaries"]
     plot_type = request.json["plot_type"]
-    plot_img = delta_summarizer.send_plot(plot_type, summaries)
+    dialogue = request.json["dialogue"]
+    default_summary = request.json["default_summary"]
+    plot_img = delta_summarizer.send_plot(plot_type, summaries, dialogue, default_summary)
     return send_file(plot_img, mimetype='image/png')
 
 

@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List, Dict
 from summarization.models.summarizer import SummarizationModel
-from summarization.models.samsum import Samsum
 
 
 class Agent(ABC):

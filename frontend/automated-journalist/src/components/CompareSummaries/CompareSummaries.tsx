@@ -1,52 +1,59 @@
-import {FormControlLabel, Switch} from "@mui/material";
+import { FormControlLabel, Switch } from "@mui/material";
 import "./CompareSummaries.css"
-import {useState} from "react";
-import {useFetchDeltaSummarize} from "../../hooks/APIHooks";
+import { useState } from "react";
+import { SummarizeRequest, useFetchDeltaSummarize } from "../../hooks/APIHooks";
+import { SummaryModel } from "../Summary/models/Summary";
+import { Samsum } from "../../backend-objects/Samsum";
+import useStore from "../../store/store";
 
 interface CompareSummariesProps {
-    selectedCompareTopic1:string;
-    selectedCompareTopic2:string;
+    selectedCompareTopic1: SummaryModel;
+    selectedCompareTopic2: SummaryModel;
+    selectedDialogue: Samsum | null;
 }
 
 
-export function CompareSummaries({selectedCompareTopic1, selectedCompareTopic2} : CompareSummariesProps){
+export function CompareSummaries({ selectedCompareTopic1, selectedCompareTopic2, selectedDialogue }: CompareSummariesProps) {
+    const { defaultSummary } = useStore();
     const graphTypes = ["Scatter Plot", "Cosine Similarity Matrix"];
     const [switchLabel, setSwitchLabel] = useState(graphTypes[0]);
     const [checked, setChecked] = useState(false);
     const [requestData, setRequestData] = useState({
         summaries: {
-            "0_you_it_the_to": "Benjamin, Hilary, Elliot and Daniel are going to meet for drinks in the evening. They will go back to the apartment together. Benjamin will come at lunchtime and take the keys.",
-            "5_the_we_world_and": "Benjamin is having lunch with some French people who work on the history of food in colonial Mexico. He's yawning and wants to take a nap.",
-            "8_due_august_tuesday_july": "Hilary is meeting them at the entrance to the"
+            [selectedCompareTopic1.title]: selectedCompareTopic1.content,
+            [selectedCompareTopic2.title]: selectedCompareTopic2.content
         },
-        plot_type: '2d_scatter_plot', // cosine_similarity
+        plot_type: '2d_scatter_plot', // scatter plot
+        default_summary: defaultSummary ?? "",
+        dialogue: selectedDialogue?.summary ?? ""
     });
 
     const { imageSrc, loading, error } = useFetchDeltaSummarize(requestData);
 
-    const handleChange = (event : React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setChecked(event.target.checked);
-        if(checked){
-            setSwitchLabel(graphTypes[0])
-            setRequestData({
-                summaries: {
-                    "0_you_it_the_to": "Benjamin, Hilary, Elliot and Daniel are going to meet for drinks in the evening. They will go back to the apartment together. Benjamin will come at lunchtime and take the keys.",
-                    "5_the_we_world_and": "Benjamin is having lunch with some French people who work on the history of food in colonial Mexico. He's yawning and wants to take a nap.",
-                    "8_due_august_tuesday_july": "Hilary is meeting them at the entrance to the"
-                },
-                plot_type: '2d_scatter_plot', // cosine_similarity
-            })
+
+        let data: SummarizeRequest = {
+            summaries: {},
+            plot_type: '',
+            default_summary: '',
+            dialogue: ''
+        }
+
+        data.summaries[selectedCompareTopic1.title] = selectedCompareTopic1.content;
+        data.summaries[selectedCompareTopic2.title] = selectedCompareTopic2.content;
+
+        if (checked) {
+            setSwitchLabel(graphTypes[0]);
+            data.plot_type = '2d_scatter_plot';
+            data.default_summary = defaultSummary ?? "";
+            data.dialogue = selectedDialogue?.summary ?? "";
+            setRequestData(data);
         }
         else {
-            setSwitchLabel(graphTypes[1])
-            setRequestData({
-                summaries: {
-                    "0_you_it_the_to": "Benjamin, Hilary, Elliot and Daniel are going to meet for drinks in the evening. They will go back to the apartment together. Benjamin will come at lunchtime and take the keys.",
-                    "5_the_we_world_and": "Benjamin is having lunch with some French people who work on the history of food in colonial Mexico. He's yawning and wants to take a nap.",
-                    "8_due_august_tuesday_july": "Hilary is meeting them at the entrance to the"
-                },
-                plot_type: 'cosine_similarity', // cosine_similarity
-            })
+            setSwitchLabel(graphTypes[1]);
+            data.plot_type = 'cosine_similarity';
+            setRequestData(data);
         }
     };
 
@@ -56,16 +63,16 @@ export function CompareSummaries({selectedCompareTopic1, selectedCompareTopic2} 
     return <>
         <div className="compare-summary-page">
             <div className="title-area">
-                Compare Summaries: {selectedCompareTopic1} and {selectedCompareTopic2}
+                Compare Summaries: {selectedCompareTopic1.title} and {selectedCompareTopic2.title}
             </div>
             <FormControlLabel
                 control={
-                    <Switch checked={checked} onChange={handleChange} defaultChecked color="default"/>
+                    <Switch checked={checked} onChange={handleChange} defaultChecked color="default" />
                 }
                 label={switchLabel}
             />
             <div>
-                {imageSrc && <img src={imageSrc} style={{maxWidth: '600px', height: 'auto'}} />}
+                {imageSrc && <img src={imageSrc} style={{ maxWidth: '600px', height: 'auto' }} />}
             </div>
         </div>
     </>
