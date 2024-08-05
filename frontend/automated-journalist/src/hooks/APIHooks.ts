@@ -102,16 +102,16 @@ export const useFetchDeltaSummarize = (requestData: SummarizeRequest) => {
 };
 
 
-export const useSummarize = () => {
+export const useSummarize = (dialogue: Samsum[]) => {
     const [summary, setSummary] = useState<[Samsum] | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const { conversations, setDefaultSummary } = useStore();
+    const { setDefaultSummary } = useStore();
     const fetchSummary = async () => {
         setLoading(true);
         setError(null);
         try {
-            const summaryAPI = new ConversationSummary(conversations)
+            const summaryAPI = new ConversationSummary(dialogue)
             const summaryRes = await summaryAPI.getSummary();
             setSummary(summaryRes);
             // Default summary saved in the store for delta summarization.
