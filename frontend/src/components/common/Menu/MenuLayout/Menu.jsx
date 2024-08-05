@@ -10,7 +10,7 @@ export function Menu() {
 
   return (
     <div className="menu-div">
-      <MenuItem icon={homeIcon} text="Home" onClick={() => navigate("/feed")} />
+      <MenuItem icon={homeIcon} text="Home" onClick={() => navigate("/")} />
       <MenuItem
         icon={searchIcon}
         text="Search"
