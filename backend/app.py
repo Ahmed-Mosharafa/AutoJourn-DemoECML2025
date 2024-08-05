@@ -52,14 +52,16 @@ from api_connection.reddit_api.reddit_api import RedditAPI
 from topic_modeling.Bertopic import Bertopic
 from asgiref.wsgi import WsgiToAsgi
 from flask import Flask, request, jsonify, send_file
-from flask_restx import Api, Resource
+from flask_restx import Api, Resource, fields
 import config
 import logging
 
 # Initialize the application's components
 app = Flask('NLPLAB')
 
-api = Api(app)
+api = Api(app, version='1.0', 
+          title='Automated Journalist App', 
+          description='API for Automated Journalist App - NLP Summarization & Topic Modeling')
 
 asgi_app = WsgiToAsgi(app)
 config.init()
@@ -74,6 +76,12 @@ summarizer_agent = AgentsFactory.get_agent(summarizer_model)
 topic_aware_summarizer = TopicAwareSummarization()
 delta_summarizer = DeltaSummarization()
 lang_detect = LangDetect()
+
+samsum = api.model('Samsum', {
+    'id': fields.String(description='id of the conversation'),
+    'summary': fields.String(description='summary of the conversation'),
+    'dialogue': fields.String(description='dialogue to summarize'),
+})
 
 if __name__ != '__main__':
     # App is being run externally (through gunicorn).
@@ -103,6 +111,7 @@ class SearchTelegram(Resource):
 
 @api.route('/search-reddit')
 class SearchReddit(Resource):
+    @api.doc(params={'query': 'a string'})
     def get():
         query = request.args["query"]
         response = reddit_api.get_conversations(query, limit=5)
@@ -122,6 +131,13 @@ class SearchReddit(Resource):
 
 @api.route('/topics')
 class Topics(Resource):
+    @api.doc(body=api.model(
+        'Topics',        
+        {
+            'conversations': fields.List(fields.String, description='list of conversations'),
+            'num_topics': fields.Integer(description='number of topics to extract')
+        })
+    ) 
     def post():
         # return jsonify({"body": request.json, "num_topics": request.args["num_topics"]})
         conversation_list = request.json["conversations"]
@@ -140,6 +156,11 @@ class Topics(Resource):
 
 @api.route('/summarize')
 class Summarize(Resource):
+    @api.doc(body=api.model(
+        'Summarize', {
+            'conversations': fields.List(fields.String, description='list of conversations')
+        }
+    ))
     def post(): 
         conversation_list = request.json["conversations"]
         conv_summaries = summarizer_agent.run_all(conversation_list)
@@ -148,6 +169,13 @@ class Summarize(Resource):
 
 @api.route('/topic-aware-summarize')
 class TopicAwareSummarize(Resource):
+    @api.doc(body=api.model(
+        'TopicAwareModel', {
+            'conversations': fields.List(fields.String, description='list of conversations'),
+            'dialogue': fields.ClassName('Samsum', description='dialogue to summarize'),
+            'num_topics': fields.Integer(description='number of topics to extract')
+        }
+    ))
     def post():
         conversation_list = request.json["conversations"]
         dialogue_to_summarize = request.json["dialogue"]
@@ -166,23 +194,34 @@ class TopicAwareSummarize(Resource):
         return jsonify({"conv_summaries": conv_summaries})
 
 
-@app.route('/delta-summarize', methods=["POST"])
-def delta_summarize():
-    summaries = request.json["summaries"]
-    plot_type = request.json["plot_type"]
-    dialogue = request.json["dialogue"]
-    default_summary = request.json["default_summary"]
-    plot_img = delta_summarizer.send_plot(plot_type, summaries, dialogue, default_summary)
-    return send_file(plot_img, mimetype='image/png')
+@api.route('/delta-summarize')
+class DeltaSummarize(Resource):
+    @api.doc(body=api.model(
+        'DeltaSummarize', {
+            'summaries': fields.List(fields.String, description='list of summaries'),
+            'plot_type': fields.String(description='type of plot'),
+            'dialogue': fields.ClassName('Samsum', description='dialogue to summarize'),
+            'default_summary': fields.String(description='default summary')
+        }
+    ))
+    def post():
+        summaries = request.json["summaries"]
+        plot_type = request.json["plot_type"]
+        dialogue = request.json["dialogue"]
+        default_summary = request.json["default_summary"]
+        plot_img = delta_summarizer.send_plot(plot_type, summaries, dialogue, default_summary)
+        return send_file(plot_img, mimetype='image/png')
 
 
-@app.route('/health', methods=["GET"])
-def get_health_status():
-    """
-    API endpoint to check if the app has started running
-    :return: The health status of the app.
-    """
-    return jsonify({"status": "healthy"})
+@app.route('/health')
+class Health(Resource):
+    @api.doc(description='Check if the app is running.')
+    def get():
+        """
+        API endpoint to check if the app has started running
+        :return: The health status of the app.
+        """
+        return jsonify({"status": "healthy"})
 
 
 @app.after_request

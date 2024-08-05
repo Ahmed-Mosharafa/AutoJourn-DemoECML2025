@@ -1,43 +1,24 @@
-# TextSummarizationLab21
+# Automated Journalist App
 
-Includes the code-base for the NLP Lab Course for Text Summarization SOSE2024
+Includes the code-base for the NLP Lab Course for Automated Journalist App SOSE2024
 
 ## API Documentation
 
-### **[GET]** `/search-reddit`
-
-#### Example:
-
-##### Request:
-
-```shell
-curl http://127.0.0.1:8787/search-reddit?query="Football"  > data.json
-```
-
-### **[GET]** `/topics`
-
-#### Example:
-
-##### Request:
-
-```bash
-curl --header "Content-Type: application/json" --request POST --data "@data.json"  http://127.0.0.1:8787/topics?num_topics=10 > topics.json
-```
-
-### **[GET]** `/summarize`
-
-#### Example:
-
-##### Request:
-
-```bash
-curl --header "Content-Type: application/json" --request POST --data "@data.json" http://127.0.0.1:8787/summarize > summaries.json
-```
+You can find the api (swagger) documentation under the link: http://127.0.0.1:8787/
 
 ## Installation:
 
-- Create and run a Python virtualenv
+You may create a Python environment either by pipenv or virtualenv. In
+the following both installation steps are written. Please select either pipenv
+or virtualenv and install it using one of those.
 
+### pipenv
+```
+$ pipenv shell
+$ pipenv install
+```
+
+### virtualenv
 ```
 $ virtualenv -p python3 venv
 $ source venv/bin/activate
@@ -55,13 +36,12 @@ $ pip3 install -r requirements.txt
 $ set -a; source .env; set +a
 ```
 
-- Run the gunicorn server:
+
+## Run the uvicorn server to deploy:
+For development purposes, you may also start the with the "flask run" commmand.
+If you run the app with "flask run", you can also use a Python debugger. For the
+deployment server, use the following "uvicorn" command:
 
 ```
-$ gunicorn -w <number_of_worker_processes> -b <host_ip> -k gevent ratimator.app:app /
-   --timeout <worker timeout in seconds> --keep-alive <keep request connection live time in seconds> /
-   --access-logfile -
-
- // Example:
- gunicorn -w 4 -b localhost:8787 -k gevent app:app --timeout 1000 --keep-alive 1000 --access-logfile - --preload
+$ uvicorn app:asgi_app --port 8787 --host 127.0.0.1
 ```
