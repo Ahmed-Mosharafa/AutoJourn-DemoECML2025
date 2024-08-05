@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 import io
 
+from utils.preprocessing import preprocess
+
 
 class DeltaSummarization:
     def __init__(self):
@@ -70,6 +72,8 @@ class DeltaSummarization:
 
     def send_plot(self, plot_type: str, topic_summaries: Dict[str, str],
                   dialogue: str, default_summary: str):
+        # Dialouge must be preprocessed since it directly comes from the original conversation.
+        dialogue = preprocess(dialogue)
         img_buffer = io.BytesIO()
         if plot_type == 'cosine_similarity':
             img_buffer = self.create_cosine_similarity_matrix(img_buffer, topic_summaries)
