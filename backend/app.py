@@ -51,7 +51,7 @@ from api_connection.telegram_api.telegram_api import TelegramAPI
 from api_connection.reddit_api.reddit_api import RedditAPI
 from topic_modeling.Bertopic import Bertopic
 from asgiref.wsgi import WsgiToAsgi
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, redirect, url_for
 from flask_restx import Api, Resource, fields
 import config
 import logging
@@ -59,8 +59,8 @@ import logging
 # Initialize the application's components
 app = Flask('NLPLAB')
 
-api = Api(app, version='1.0', 
-          title='Automated Journalist App', 
+api = Api(app, version='1.0',
+          title='Automated Journalist App',
           description='API for Automated Journalist App - NLP Summarization & Topic Modeling')
 
 asgi_app = WsgiToAsgi(app)
@@ -92,21 +92,21 @@ if __name__ != '__main__':
     # Use the specified log level.
     app.logger.setLevel(gunicorn_logger.level)
 
-@api.route('/search-telegram')
-class SearchTelegram(Resource):
-    @api.doc(params={'query': 'a string'})
-    async def get(self):
-        query = request.args["query"]
-        response = await tele_api.get_conversations(query, channel_limit=config.Config.MAX_NUM_OF_TELEGRAM_CHANNELS,
-                                                    message_limit=config.Config.MAX_NUM_OF_TELEGRAM_MESSAGES_PER_CHANNEL)
-        final_response = []
-        for conv in response:
-            try:
-                if lang_detect.is_english(conv['dialogue']):
-                    final_response.append(conv)
-            except:
-                continue
-        return jsonify({"conversations": final_response})
+
+@app.route('/search-telegram', methods=["GET"])
+async def fetch_telegram():
+    query = request.args["query"]
+    response = await tele_api.get_conversations(query, channel_limit=config.Config.MAX_NUM_OF_TELEGRAM_CHANNELS,
+                                                message_limit=config.Config.MAX_NUM_OF_TELEGRAM_MESSAGES_PER_CHANNEL)
+    final_response = []
+    for conv in response:
+        try:
+            if lang_detect.is_english(conv['dialogue']):
+                final_response.append(conv)
+        except:
+            continue
+
+    return jsonify({"conversations": final_response})
 
 
 @api.route('/search-reddit')
@@ -132,12 +132,12 @@ class SearchReddit(Resource):
 @api.route('/topics')
 class Topics(Resource):
     @api.doc(body=api.model(
-        'Topics',        
+        'Topics',
         {
             'conversations': fields.List(fields.String, description='list of conversations'),
             'num_topics': fields.Integer(description='number of topics to extract')
         })
-    ) 
+    )
     def post(self):
         # return jsonify({"body": request.json, "num_topics": request.args["num_topics"]})
         conversation_list = request.json["conversations"]
@@ -161,7 +161,7 @@ class Summarize(Resource):
             'conversations': fields.List(fields.String, description='list of conversations')
         }
     ))
-    def post(self): 
+    def post(self):
         conversation_list = request.json["conversations"]
         conv_summaries = summarizer_agent.run_all(conversation_list)
         return jsonify({"summaries": conv_summaries})
@@ -183,14 +183,16 @@ class TopicAwareSummarize(Resource):
         # Update topic count if necessary.
         bertopic.check_topic_count(num_topics)
         try:
-            topics_df, topic_embeddings = bertopic.get_topic_embeddings(conversation_list)
+            topics_df, topic_embeddings = bertopic.get_topic_embeddings(
+                conversation_list)
             if len(topic_embeddings < 3):
                 topics_df, topic_embeddings = bertopic.get_static_topics()
         except:
             topics_df, topic_embeddings = bertopic.get_static_topics()
         dict_topic_sentences = topic_aware_summarizer.extract_topic_sentences(dialogue_to_summarize, topics_df,
-                                                                            topic_embeddings)
-        conv_summaries = summarizer_agent.run_all_topic_aware(dict_topic_sentences)
+                                                                              topic_embeddings)
+        conv_summaries = summarizer_agent.run_all_topic_aware(
+            dict_topic_sentences)
         return jsonify({"conv_summaries": conv_summaries})
 
 
@@ -209,7 +211,8 @@ class DeltaSummarize(Resource):
         plot_type = request.json["plot_type"]
         dialogue = request.json["dialogue"]
         default_summary = request.json["default_summary"]
-        plot_img = delta_summarizer.send_plot(plot_type, summaries, dialogue, default_summary)
+        plot_img = delta_summarizer.send_plot(
+            plot_type, summaries, dialogue, default_summary)
         return send_file(plot_img, mimetype='image/png')
 
 
