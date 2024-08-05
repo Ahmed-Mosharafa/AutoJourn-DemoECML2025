@@ -112,7 +112,7 @@ class SearchTelegram(Resource):
 @api.route('/search-reddit')
 class SearchReddit(Resource):
     @api.doc(params={'query': 'a string'})
-    def get():
+    def get(self):
         query = request.args["query"]
         response = reddit_api.get_conversations(query, limit=5)
         return jsonify({"conversations": response})
@@ -138,7 +138,7 @@ class Topics(Resource):
             'num_topics': fields.Integer(description='number of topics to extract')
         })
     ) 
-    def post():
+    def post(self):
         # return jsonify({"body": request.json, "num_topics": request.args["num_topics"]})
         conversation_list = request.json["conversations"]
         num_topics = int(request.json["num_topics"])
@@ -161,7 +161,7 @@ class Summarize(Resource):
             'conversations': fields.List(fields.String, description='list of conversations')
         }
     ))
-    def post(): 
+    def post(self): 
         conversation_list = request.json["conversations"]
         conv_summaries = summarizer_agent.run_all(conversation_list)
         return jsonify({"summaries": conv_summaries})
@@ -176,7 +176,7 @@ class TopicAwareSummarize(Resource):
             'num_topics': fields.Integer(description='number of topics to extract')
         }
     ))
-    def post():
+    def post(self):
         conversation_list = request.json["conversations"]
         dialogue_to_summarize = request.json["dialogue"]
         num_topics = int(request.json["num_topics"])
@@ -204,7 +204,7 @@ class DeltaSummarize(Resource):
             'default_summary': fields.String(description='default summary')
         }
     ))
-    def post():
+    def post(self):
         summaries = request.json["summaries"]
         plot_type = request.json["plot_type"]
         dialogue = request.json["dialogue"]
@@ -216,7 +216,7 @@ class DeltaSummarize(Resource):
 @app.route('/health')
 class Health(Resource):
     @api.doc(description='Check if the app is running.')
-    def get():
+    def get(self):
         """
         API endpoint to check if the app has started running
         :return: The health status of the app.
