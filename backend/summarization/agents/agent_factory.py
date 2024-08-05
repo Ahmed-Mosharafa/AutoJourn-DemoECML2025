@@ -1,6 +1,6 @@
 from config import Config
 from summarization.agents import agent, base_agent, randomizer_agent, main_thread_agent, \
-    conv_tree_agent, temporal_agent
+    conv_tree_agent, temporal_agent, social_media_agent
 from summarization.models.summarizer import SummarizationModel
 
 
@@ -9,6 +9,9 @@ class AgentsFactory:
     @staticmethod
     def get_agent(summarizer_model: SummarizationModel) -> agent.Agent:
         method = Config.CONV_SUMMARIZER_METHOD
+
+        if method == "telegram" or method == "reddit":
+            return social_media_agent.SocialMediaAgent(summarizer_model=summarizer_model)
 
         if method == "tree":
             return conv_tree_agent.ConvTreeAgent(summarizer_model=summarizer_model)
