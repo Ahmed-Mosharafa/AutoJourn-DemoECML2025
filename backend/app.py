@@ -46,7 +46,7 @@ from summarization.delta_summarization.delta_summarization import DeltaSummariza
 from summarization.models.bart import Bart
 from summarization.agents.agent_factory import AgentsFactory
 from summarization.topic_aware_summarization.topic_aware_summarization import TopicAwareSummarization
-# from api_connection.twitter_api.twitter_api import TweetAPI
+from api_connection.twitter_api.twitter_api import TweetAPI
 from api_connection.telegram_api.telegram_api import TelegramAPI
 from api_connection.reddit_api.reddit_api import RedditAPI
 from topic_modeling.Bertopic import Bertopic
@@ -59,9 +59,11 @@ import logging
 app = Flask('NLPLAB')
 asgi_app = WsgiToAsgi(app)
 config.init()
-# api = TweetAPI()
+
+twitter_api = TweetAPI()
 tele_api = TelegramAPI()
 reddit_api = RedditAPI()
+
 bertopic = Bertopic(num_topics=10)  # Default number of topics is 10.
 summarizer_model = Bart(config.Config.SUMMARIZATION_MODEL)
 summarizer_agent = AgentsFactory.get_agent(summarizer_model)
@@ -101,12 +103,15 @@ def fetch_reddit():
     return jsonify({"conversations": response})
 
 
-@app.route('/search', methods=["GET"])
-def fetch_conversations():
-    # Load conversations from a local JSON file
-    with open('dataset/test.json', 'r') as infile:  # Replace with your dataset path
-        conversations = json.load(infile)
-    return jsonify({"conversations": conversations})
+@app.route('/search-twitter', methods=["GET"])
+def fetch_tweets():
+    query = request.args["query"]
+    response = twitter_api.get_conversations(search_keyword=query,
+                                     max_num_conv=config.Config.API_MAX_NUM_CONVERSATIONS,
+                                     max_num_pages=config.Config.API_MAX_NUM_PAGES,
+                                     max_page_res=config.Config.API_MAX_PAGE_NUM_RESULTS,
+                                     parse_func=twitter_api.parse_as_conv_hierarchy)
+    return jsonify({"conversations": response})
 
 
 @app.route('/topics', methods=["POST"])
