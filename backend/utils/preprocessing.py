@@ -1,5 +1,4 @@
 import re
-from nltk.tokenize import RegexpTokenizer
 import spacy
 
 
