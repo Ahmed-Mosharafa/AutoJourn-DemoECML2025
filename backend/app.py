@@ -46,21 +46,25 @@ from summarization.delta_summarization.delta_summarization import DeltaSummariza
 from summarization.models.bart import Bart
 from summarization.agents.agent_factory import AgentsFactory
 from summarization.topic_aware_summarization.topic_aware_summarization import TopicAwareSummarization
-from api_connection.twitter_api.twitter_api import TweetAPI
+# from api_connection.twitter_api.twitter_api import TweetAPI
 from api_connection.telegram_api.telegram_api import TelegramAPI
 from api_connection.reddit_api.reddit_api import RedditAPI
 from topic_modeling.Bertopic import Bertopic
 from asgiref.wsgi import WsgiToAsgi
 from flask import Flask, request, jsonify, send_file
+from flask_restx import Api, Resource
 import config
 import logging
 
 # Initialize the application's components
 app = Flask('NLPLAB')
+
+api = Api(app)
+
 asgi_app = WsgiToAsgi(app)
 config.init()
 
-twitter_api = TweetAPI()
+# twitter_api = TweetAPI()
 tele_api = TelegramAPI()
 reddit_api = RedditAPI()
 
@@ -80,81 +84,86 @@ if __name__ != '__main__':
     # Use the specified log level.
     app.logger.setLevel(gunicorn_logger.level)
 
+@api.route('/search-telegram')
+class SearchTelegram(Resource):
+    @api.doc(params={'query': 'a string'})
+    async def get(self):
+        query = request.args["query"]
+        response = await tele_api.get_conversations(query, channel_limit=config.Config.MAX_NUM_OF_TELEGRAM_CHANNELS,
+                                                    message_limit=config.Config.MAX_NUM_OF_TELEGRAM_MESSAGES_PER_CHANNEL)
+        final_response = []
+        for conv in response:
+            try:
+                if lang_detect.is_english(conv['dialogue']):
+                    final_response.append(conv)
+            except:
+                continue
+        return jsonify({"conversations": final_response})
 
-@app.route('/search-telegram', methods=["GET"])
-async def fetch_telegram():
-    query = request.args["query"]
-    response = await tele_api.get_conversations(query, channel_limit=config.Config.MAX_NUM_OF_TELEGRAM_CHANNELS,
-                                                message_limit=config.Config.MAX_NUM_OF_TELEGRAM_MESSAGES_PER_CHANNEL)
-    final_response = []
-    for conv in response:
+
+@api.route('/search-reddit')
+class SearchReddit(Resource):
+    def get():
+        query = request.args["query"]
+        response = reddit_api.get_conversations(query, limit=5)
+        return jsonify({"conversations": response})
+
+
+# @app.route('/search-twitter', methods=["GET"])
+# def fetch_tweets():
+#     query = request.args["query"]
+#     response = twitter_api.get_conversations(search_keyword=query,
+#                                      max_num_conv=config.Config.API_MAX_NUM_CONVERSATIONS,
+#                                      max_num_pages=config.Config.API_MAX_NUM_PAGES,
+#                                      max_page_res=config.Config.API_MAX_PAGE_NUM_RESULTS,
+#                                      parse_func=twitter_api.parse_as_conv_hierarchy)
+#     return jsonify({"conversations": response})
+
+
+@api.route('/topics')
+class Topics(Resource):
+    def post():
+        # return jsonify({"body": request.json, "num_topics": request.args["num_topics"]})
+        conversation_list = request.json["conversations"]
+        num_topics = int(request.json["num_topics"])
+        # Update topic count if necessary.
+        bertopic.check_topic_count(num_topics)
+        if config.Config.TOPIC_PER_TWEET:
+            conv_topic_probs, topics = bertopic.run_tweet_topic_modeling(
+                conversation_list)
+        else:
+            conv_topic_probs, topics = bertopic.run_con_topic_modeling(
+                conversation_list)
+
+        return jsonify({"topics": conv_topic_probs, "index_to_topic": topics})
+
+
+@api.route('/summarize')
+class Summarize(Resource):
+    def post(): 
+        conversation_list = request.json["conversations"]
+        conv_summaries = summarizer_agent.run_all(conversation_list)
+        return jsonify({"summaries": conv_summaries})
+
+
+@api.route('/topic-aware-summarize')
+class TopicAwareSummarize(Resource):
+    def post():
+        conversation_list = request.json["conversations"]
+        dialogue_to_summarize = request.json["dialogue"]
+        num_topics = int(request.json["num_topics"])
+        # Update topic count if necessary.
+        bertopic.check_topic_count(num_topics)
         try:
-            if lang_detect.is_english(conv['dialogue']):
-                final_response.append(conv)
+            topics_df, topic_embeddings = bertopic.get_topic_embeddings(conversation_list)
+            if len(topic_embeddings < 3):
+                topics_df, topic_embeddings = bertopic.get_static_topics()
         except:
-            continue
-    return jsonify({"conversations": final_response})
-
-
-@app.route('/search-reddit', methods=["GET"])
-def fetch_reddit():
-    query = request.args["query"]
-    response = reddit_api.get_conversations(query, limit=5)
-    return jsonify({"conversations": response})
-
-
-@app.route('/search-twitter', methods=["GET"])
-def fetch_tweets():
-    query = request.args["query"]
-    response = twitter_api.get_conversations(search_keyword=query,
-                                     max_num_conv=config.Config.API_MAX_NUM_CONVERSATIONS,
-                                     max_num_pages=config.Config.API_MAX_NUM_PAGES,
-                                     max_page_res=config.Config.API_MAX_PAGE_NUM_RESULTS,
-                                     parse_func=twitter_api.parse_as_conv_hierarchy)
-    return jsonify({"conversations": response})
-
-
-@app.route('/topics', methods=["POST"])
-def fetch_topics():
-    # return jsonify({"body": request.json, "num_topics": request.args["num_topics"]})
-    conversation_list = request.json["conversations"]
-    num_topics = int(request.json["num_topics"])
-    # Update topic count if necessary.
-    bertopic.check_topic_count(num_topics)
-    if config.Config.TOPIC_PER_TWEET:
-        conv_topic_probs, topics = bertopic.run_tweet_topic_modeling(
-            conversation_list)
-    else:
-        conv_topic_probs, topics = bertopic.run_con_topic_modeling(
-            conversation_list)
-
-    return jsonify({"topics": conv_topic_probs, "index_to_topic": topics})
-
-
-@app.route('/summarize', methods=["POST"])
-def fetch_summaries():
-    conversation_list = request.json["conversations"]
-    conv_summaries = summarizer_agent.run_all(conversation_list)
-    return jsonify({"summaries": conv_summaries})
-
-
-@app.route('/topic-aware-summarize', methods=["POST"])
-def topic_aware_summarize():
-    conversation_list = request.json["conversations"]
-    dialogue_to_summarize = request.json["dialogue"]
-    num_topics = int(request.json["num_topics"])
-    # Update topic count if necessary.
-    bertopic.check_topic_count(num_topics)
-    try:
-        topics_df, topic_embeddings = bertopic.get_topic_embeddings(conversation_list)
-        if len(topic_embeddings < 3):
             topics_df, topic_embeddings = bertopic.get_static_topics()
-    except:
-        topics_df, topic_embeddings = bertopic.get_static_topics()
-    dict_topic_sentences = topic_aware_summarizer.extract_topic_sentences(dialogue_to_summarize, topics_df,
-                                                                          topic_embeddings)
-    conv_summaries = summarizer_agent.run_all_topic_aware(dict_topic_sentences)
-    return jsonify({"conv_summaries": conv_summaries})
+        dict_topic_sentences = topic_aware_summarizer.extract_topic_sentences(dialogue_to_summarize, topics_df,
+                                                                            topic_embeddings)
+        conv_summaries = summarizer_agent.run_all_topic_aware(dict_topic_sentences)
+        return jsonify({"conv_summaries": conv_summaries})
 
 
 @app.route('/delta-summarize', methods=["POST"])

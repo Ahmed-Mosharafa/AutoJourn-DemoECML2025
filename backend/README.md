@@ -1,17 +1,17 @@
 # TextSummarizationLab21
 
-Includes the code-base for the NLP Lab Course for Text Summarization SOSE2021
+Includes the code-base for the NLP Lab Course for Text Summarization SOSE2024
 
 ## API Documentation
 
-### **[GET]** `/search`
+### **[GET]** `/search-reddit`
 
 #### Example:
 
 ##### Request:
 
 ```shell
-curl http://127.0.0.1:8787/search?query="Football"  > data.json
+curl http://127.0.0.1:8787/search-reddit?query="Football"  > data.json
 ```
 
 ### **[GET]** `/topics`
