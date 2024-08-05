@@ -2,6 +2,7 @@ import re
 from nltk.tokenize import RegexpTokenizer
 import spacy
 
+
 def remove_patterns(text):
     """
         Remove punctions, emails, hashtags in given text
@@ -18,22 +19,4 @@ def remove_patterns(text):
     # Remove punctuation
     text = re.sub(r'[^\w\s]', '', text)
 
-    return text
-
-def extract_patterns(text):
-    """
-        Extract punctions, emails, hashtags in given text
-    """
-    # extract emails
-    emails = re.findall(r'\S+@\S+', text)
-    # extract hashtags
-    hashtags = re.findall(r'#\w+', text)
-    # extract punctuation
-    punctuation = re.findall(r'[^\w\s]', text)
-    
-    return punctuation, emails, hashtags
-
-def remove_punct_nltk(text):
-    tokenizer = RegexpTokenizer(r'\w+')
-    tokenizer.tokenize(text)
     return text
