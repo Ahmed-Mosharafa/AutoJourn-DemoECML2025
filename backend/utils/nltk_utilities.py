@@ -1,23 +1,13 @@
-### Imports
 import nltk
 from nltk.tokenize import sent_tokenize
 nltk.data.path.append("/nltk_data/")
 
 
 class NltkSegmentizer:
-    ##==========================================================================================================
-    """
-    Definition of attributes
-    """
-
-    ##==========================================================================================================
-    """
-    Function: __init__
-    """
     def __init__(self):
         print("Initializing NltkSegmentizer object")
         nltk.download('punkt')
-    ##==========================================================================================================
+
     """
     Function: segment_into_sentences
     """
@@ -33,6 +23,3 @@ class NltkSegmentizer:
                 intermediate_result.extend(sent_tokenize(sent))
 
         return intermediate_result
-    ##==========================================================================================================
-
-##==========================================================================================================

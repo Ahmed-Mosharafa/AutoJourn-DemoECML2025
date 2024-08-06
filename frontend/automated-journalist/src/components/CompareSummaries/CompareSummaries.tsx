@@ -25,7 +25,7 @@ export function CompareSummaries({ selectedCompareTopic1, selectedCompareTopic2,
         },
         plot_type: '2d_scatter_plot', // scatter plot
         default_summary: defaultSummary ?? "",
-        dialogue: selectedDialogue?.summary ?? ""
+        dialogue: selectedDialogue?.dialogue ?? ""
     });
 
     const { imageSrc, loading, error } = useFetchDeltaSummarize(requestData);
@@ -47,7 +47,7 @@ export function CompareSummaries({ selectedCompareTopic1, selectedCompareTopic2,
             setSwitchLabel(graphTypes[0]);
             data.plot_type = '2d_scatter_plot';
             data.default_summary = defaultSummary ?? "";
-            data.dialogue = selectedDialogue?.summary ?? "";
+            data.dialogue = selectedDialogue?.dialogue ?? "";
             setRequestData(data);
         }
         else {

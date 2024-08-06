@@ -20,7 +20,7 @@ interface SummaryProps {
 export function Summary({ selectedDialogue, selectedCompareTopic1, selectedCompareTopic2, setSelectedCompareTopic1, setSelectedCompareTopic2 }: SummaryProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const topicSelectTitle = "Topic";
-  const { fetchSummary, summary, loading, error } = useSummarize()
+  const { fetchSummary, summary, loading, error } = useSummarize([selectedDialogue ?? { id: "-1", summary: "", dialogue: "" }])
   const { fetchTopicAwareSummary, summaries: topicAwareSummaries, loading: topicAwareLoading, error: topicAwareError } = useTopicAwareSummarize(selectedDialogue ?? { id: "-1", summary: "", dialogue: "" })
   const { searchQuery, isSummarize } = useStore();
   const [selectedSummaryTopic, setSelectedSummaryTopic] = useState("Default");

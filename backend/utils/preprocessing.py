@@ -1,6 +1,6 @@
 import re
-from nltk.tokenize import RegexpTokenizer
 import spacy
+
 
 def remove_patterns(text):
     """
@@ -20,20 +20,14 @@ def remove_patterns(text):
 
     return text
 
-def extract_patterns(text):
-    """
-        Extract punctions, emails, hashtags in given text
-    """
-    # extract emails
-    emails = re.findall(r'\S+@\S+', text)
-    # extract hashtags
-    hashtags = re.findall(r'#\w+', text)
-    # extract punctuation
-    punctuation = re.findall(r'[^\w\s]', text)
-    
-    return punctuation, emails, hashtags
 
-def remove_punct_nltk(text):
-    tokenizer = RegexpTokenizer(r'\w+')
-    tokenizer.tokenize(text)
+def preprocess(text):
+    # Remove links
+    text = re.sub(r"http\S+", "", text)
+    # Remove tags
+    text = re.sub(r"@\S+", "", text)  # remove tags
+    # Encode and decode in order to UTF-16 in order to process emojis.
+    text = text.encode('UTF-16', 'surrogatepass').decode(encoding='UTF-16')
+    # remove leading and trailing spaces.
+    text = text.strip()
     return text
