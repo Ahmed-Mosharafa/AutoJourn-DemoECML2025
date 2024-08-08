@@ -22,9 +22,8 @@ class MainThreadAgent(Agent):
 
         return main_thread
 
-    def run_conv(self, conv_root: list) -> str:
-        #main_thread = self.get_main_thread(conv_root)
-        # conv_root_list = conv_root.split("\n")
-        #tweets_list = [tweet["username"] + ":" + tweet["text"] for tweet in main_thread]
-        summary = self.summarizer_model.summarize(conv_root)
+    def run_conv(self, conv_root: Dict) -> str:
+        main_thread = self.get_main_thread(conv_root)
+        tweets_list = [tweet["username"] + ":" + tweet["text"] for tweet in main_thread]
+        summary = self.summarizer_model.summarize(tweets_list)
         return summary
