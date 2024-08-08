@@ -45,3 +45,7 @@ deployment server, use the following "uvicorn" command:
 ```
 $ uvicorn app:asgi_app --port 8787 --host 127.0.0.1
 ```
+
+## An example config.json file
+In a file called config.json the env variables such as telegram, reddit api keys are stored.
+You can find an example config file in the repo with name 'config-example.json'
