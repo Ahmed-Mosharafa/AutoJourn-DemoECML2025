@@ -139,7 +139,6 @@ class Topics(Resource):
         })
     )
     def post(self):
-        # return jsonify({"body": request.json, "num_topics": request.args["num_topics"]})
         conversation_list = request.json["conversations"]
         num_topics = int(request.json["num_topics"])
         # Update topic count if necessary.
