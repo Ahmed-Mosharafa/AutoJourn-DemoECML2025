@@ -1,0 +1,9 @@
+\section{Challenges}\label{sec:challenges}
+
+During the development of the Automated Journalist App, we encountered several challenges that required adaptive solutions:
+
+1. Transition from Twitter API: Initially, our project relied on the Twitter API for data retrieval. However, when Twitter's API transitioned to a paid model, we had to change it. To maintain the project's scope, we integrated alternative APIs from platforms like Reddit and Telegram. This shift necessitated modifications in our data processing pipeline to accommodate the different structures and content types provided by these platforms.
+
+2. Limitations of BERTopic: We employed BERTopic to extract topics from input texts, which generally provided valuable insights. However, the model struggled when working with shorter texts, often failing to generate meaningful topics. To address this, we implemented a fallback mechanism using a predefined list of topics, ensuring that even brief inputs could be categorized effectively. Also in cases where the text is long enough, the topics BERTopic produced were not entirely meaningful.
+
+3.	Slowness in Summarization: The summarization process using the BART model was slower than anticipated. This slowness affected the responsiveness of the application.
