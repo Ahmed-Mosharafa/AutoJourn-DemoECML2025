@@ -12,7 +12,7 @@ import { CompareSummaries } from "./components/CompareSummaries/CompareSummaries
 
 function App() {
   const [selectedDialogue, setSelectedDialogue] = useState<Samsum | null>(null);
-
+  const [userTopics, setUserTopics] = useState<string[]>([]);
   const [selectedCompareTopic1, setSelectedCompareTopic1] = useState({ title: "", content: "" });
   const [selectedCompareTopic2, setSelectedCompareTopic2] = useState({ title: "", content: "" });
 
@@ -25,15 +25,17 @@ function App() {
         </div>
         <div className="content">
           <Routes>
-            <Route path="/" element={<Feed setSelectedDialogue={setSelectedDialogue} />} />
-            <Route path="/feed" element={<Feed setSelectedDialogue={setSelectedDialogue} />} />
-            <Route path="/search" element={<Feed setSelectedDialogue={setSelectedDialogue} isSearch={true} />} />
+          <Route path="/" element={<Feed setSelectedDialogue={setSelectedDialogue} setUserTopics={setUserTopics} />} />
+            <Route path="/feed" element={<Feed setSelectedDialogue={setSelectedDialogue} setUserTopics={setUserTopics}/>} />
+            <Route path="/search" element={<Feed setSelectedDialogue={setSelectedDialogue} isSearch={true} setUserTopics={setUserTopics}/>} />
             <Route path="/summary" element={<Summary
               selectedDialogue={selectedDialogue}
               selectedCompareTopic1={selectedCompareTopic1}
               selectedCompareTopic2={selectedCompareTopic2}
               setSelectedCompareTopic1={setSelectedCompareTopic1}
-              setSelectedCompareTopic2={setSelectedCompareTopic2} />}
+              setSelectedCompareTopic2={setSelectedCompareTopic2} 
+              userTopics={userTopics}
+              />}
             />
             <Route path="/compare-summaries" element={<CompareSummaries
               selectedCompareTopic1={selectedCompareTopic1}

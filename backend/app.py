@@ -55,6 +55,9 @@ from flask import Flask, request, jsonify, send_file, redirect, url_for
 from flask_restx import Api, Resource, fields
 import config
 import logging
+from sentence_transformers import SentenceTransformer
+import numpy as np
+import pandas as pd
 
 # Initialize the application's components
 app = Flask('NLPLAB')
@@ -179,13 +182,21 @@ class TopicAwareSummarize(Resource):
         conversation_list = request.json["conversations"]
         dialogue_to_summarize = request.json["dialogue"]
         num_topics = int(request.json["num_topics"])
+        user_topics = request.json.get("user_topics", [])
         # Update topic count if necessary.
         bertopic.check_topic_count(num_topics)
+        
         try:
-            topics_df, topic_embeddings = bertopic.get_topic_embeddings(
-                conversation_list)
-            if len(topic_embeddings < 3):
-                topics_df, topic_embeddings = bertopic.get_static_topics()
+            if len(user_topics) > 0:
+                topics_df = pd.DataFrame(user_topics, columns=["Name"])
+                sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
+                topic_embeddings = sentence_model.encode(user_topics)
+                topic_embeddings = np.array(topic_embeddings, dtype=np.float64)
+            else:
+                topics_df, topic_embeddings = bertopic.get_topic_embeddings(
+                    conversation_list)
+                if len(topic_embeddings < 3):
+                    topics_df, topic_embeddings = bertopic.get_static_topics()
         except:
             topics_df, topic_embeddings = bertopic.get_static_topics()
         dict_topic_sentences = topic_aware_summarizer.extract_topic_sentences(dialogue_to_summarize, topics_df,
