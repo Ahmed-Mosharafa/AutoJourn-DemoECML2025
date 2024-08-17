@@ -179,13 +179,19 @@ class TopicAwareSummarize(Resource):
         conversation_list = request.json["conversations"]
         dialogue_to_summarize = request.json["dialogue"]
         num_topics = int(request.json["num_topics"])
+        user_topics = request.json.get("user_topics", [])
         # Update topic count if necessary.
         bertopic.check_topic_count(num_topics)
+        
         try:
-            topics_df, topic_embeddings = bertopic.get_topic_embeddings(
-                conversation_list)
-            if len(topic_embeddings < 3):
-                topics_df, topic_embeddings = bertopic.get_static_topics()
+            if len(user_topics) > 0:
+                topics_df, topic_embeddings = bertopic.get_input_topic_embeddings(
+                    user_topics)
+            else:
+                topics_df, topic_embeddings = bertopic.get_topic_embeddings(
+                    conversation_list)
+                if len(topic_embeddings < 3):
+                    topics_df, topic_embeddings = bertopic.get_static_topics()
         except:
             topics_df, topic_embeddings = bertopic.get_static_topics()
         dict_topic_sentences = topic_aware_summarizer.extract_topic_sentences(dialogue_to_summarize, topics_df,

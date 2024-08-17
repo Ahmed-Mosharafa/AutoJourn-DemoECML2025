@@ -131,7 +131,7 @@ export interface TopicAwareSummaryType {
 }
 
 
-export const useTopicAwareSummarize = (dialogue: Samsum) => {
+export const useTopicAwareSummarize = (dialogue: Samsum, userTopics?: string[]) => {
     const { conversations, setIsSummarize } = useStore();
     const [summaries, setSummaries] = useState<TopicAwareSummaryType | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
@@ -140,7 +140,7 @@ export const useTopicAwareSummarize = (dialogue: Samsum) => {
         setLoading(true);
         setError(null);
         try {
-            const topicAwareSummaryAPI = new TopicAwareSummary(conversations, dialogue, 10)
+            const topicAwareSummaryAPI = new TopicAwareSummary(conversations, dialogue, 10, userTopics);
             const summaries = await topicAwareSummaryAPI.getSummary();
             setSummaries(summaries);
             // Set isSummarize false after summary is performed.

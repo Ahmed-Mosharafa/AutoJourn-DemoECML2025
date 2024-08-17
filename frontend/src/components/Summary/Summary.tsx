@@ -15,13 +15,14 @@ interface SummaryProps {
   selectedCompareTopic2: SummaryModel;
   setSelectedCompareTopic1: React.Dispatch<React.SetStateAction<SummaryModel>>
   setSelectedCompareTopic2: React.Dispatch<React.SetStateAction<SummaryModel>>
+  userTopics:string[];
 }
 
-export function Summary({ selectedDialogue, selectedCompareTopic1, selectedCompareTopic2, setSelectedCompareTopic1, setSelectedCompareTopic2 }: SummaryProps) {
+export function Summary({ selectedDialogue, selectedCompareTopic1, selectedCompareTopic2, setSelectedCompareTopic1, setSelectedCompareTopic2, userTopics}: SummaryProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const topicSelectTitle = "Topic";
   const { fetchSummary, summary, loading, error } = useSummarize([selectedDialogue ?? { id: "-1", summary: "", dialogue: "" }])
-  const { fetchTopicAwareSummary, summaries: topicAwareSummaries, loading: topicAwareLoading, error: topicAwareError } = useTopicAwareSummarize(selectedDialogue ?? { id: "-1", summary: "", dialogue: "" })
+  const { fetchTopicAwareSummary, summaries: topicAwareSummaries, loading: topicAwareLoading, error: topicAwareError } = useTopicAwareSummarize(selectedDialogue ?? { id: "-1", summary: "", dialogue: "" },userTopics)
   const { searchQuery, isSummarize } = useStore();
   const [selectedSummaryTopic, setSelectedSummaryTopic] = useState("Default");
   const summaryTopicList = Object.keys(topicAwareSummaries ?? {});
