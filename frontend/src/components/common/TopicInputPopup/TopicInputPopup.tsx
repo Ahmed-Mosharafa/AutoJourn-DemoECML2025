@@ -48,7 +48,12 @@ const TopicInputPopup: React.FC<TopicInputPopupProps> = ({ onClose, onSave }) =>
         ))}
         <button onClick={handleAddTopic}>Add Another Topic</button>
         <div className="popup-actions">
-          <button onClick={handleSave}>Save</button>
+        <button onClick={handleSave}>
+          {topics.filter(topic => topic.trim() !== "").length === 0 
+            ? "Continue Without Adding" 
+            : "Save"}
+        </button>
+
           <button onClick={onClose}>Cancel</button>
         </div>
       </div>

@@ -55,9 +55,6 @@ from flask import Flask, request, jsonify, send_file, redirect, url_for
 from flask_restx import Api, Resource, fields
 import config
 import logging
-from sentence_transformers import SentenceTransformer
-import numpy as np
-import pandas as pd
 
 # Initialize the application's components
 app = Flask('NLPLAB')
@@ -188,10 +185,8 @@ class TopicAwareSummarize(Resource):
         
         try:
             if len(user_topics) > 0:
-                topics_df = pd.DataFrame(user_topics, columns=["Name"])
-                sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
-                topic_embeddings = sentence_model.encode(user_topics)
-                topic_embeddings = np.array(topic_embeddings, dtype=np.float64)
+                topics_df, topic_embeddings = bertopic.get_input_topic_embeddings(
+                    user_topics)
             else:
                 topics_df, topic_embeddings = bertopic.get_topic_embeddings(
                     conversation_list)

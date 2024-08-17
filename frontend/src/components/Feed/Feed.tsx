@@ -34,7 +34,6 @@ export function Feed({ setSelectedDialogue, isSearch, setUserTopics }: FeedProps
   };
 
   const handlePopupSave = (newTopics: string[]) => {
-    console.log(newTopics)
     setTopics(newTopics);
     summarizeText(newTopics)
   };

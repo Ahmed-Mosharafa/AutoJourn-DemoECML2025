@@ -5,7 +5,6 @@ const backendUrl = "http://localhost:8787";
 
 abstract class Summary {
     conversations: Samsum[];
-    userTopics?: string[];
 
     constructor(conversations: Samsum[]) {
         this.conversations = conversations;
