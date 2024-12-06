@@ -1,12 +1,38 @@
 .api-selector-container {
   display: flex;
-  padding-right: 20px;
-  padding-top: 3.5vh;
-  gap: 5vw;
-  font-size: 28px;
+  padding: 20px;
+  gap: 3vw;
+  font-size: 1.2rem;
   font-weight: 600;
   white-space: nowrap;
-  letter-spacing: -0.56px;
-  line-height: 110%;
-  justify-content: space-between;
+  letter-spacing: -0.4px;
+  justify-content: center;
+  background-color: #f5f5f5;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.api-selector-item {
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  color: #333;
+  background-color: #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.api-selector-item:hover {
+  background-color: #d4d4d4;
+  transform: translateY(-3px);
+  box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+.api-selector-item-selected {
+  background-color: #0073e6;
+  color: white;
+  box-shadow: 0px 4px 10px rgba(0, 115, 230, 0.3);
+  transform: scale(1.05);
 }

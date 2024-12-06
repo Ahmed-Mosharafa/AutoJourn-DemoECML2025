@@ -25,6 +25,7 @@ export function Feed({ setSelectedDialogue, isSearch, setUserTopics }: FeedProps
   const { searchQuery, setSearchQuery, setIsSummarize, conversations } = useStore();
   const [selectedAPI, setSelectedAPI] = useState(APIConstants.REDDIT);
   const [selectedDialogueIndex, setselectedDialogueIndex] = useState(-1);
+  const [loadingSearch, setLoadingSearch] = useState(false); // New loading state
   const { data: conversationResponse, loading, error } = useFetchSearch(selectedAPI);
   const [showPopup, setShowPopup] = useState<boolean>(false);
   const [topics, setTopics] = useState<string[]>([]);
@@ -60,18 +61,23 @@ export function Feed({ setSelectedDialogue, isSearch, setUserTopics }: FeedProps
       setselectedDialogueIndex(index);
     }
   }
+  const handleSearch = async (query: string) => {
+    setLoadingSearch(true); // Start loading animation
+    await setSearchQuery(query); // Assuming this triggers the data fetch
+    setLoadingSearch(false); // Stop loading animation after search
+  };
 
   if (error) {
     return <div> {error}</div>
   }
-  if (loading) {
+  if (loading || loadingSearch) {
     return <CircularLoader />
   }
   return (
-    <>
+    <div className="feed-wrapper"> {/* Add wrapper div for max width */}
       <div className="api-selector">
         <ApiSelector setSelectedAPI={setSelectedAPI} />
-        {isSearch ? <SearchBar setSearchQuery={setSearchQuery} /> : <></>}
+        {isSearch ? <SearchBar setSearchQuery={handleSearch} /> : <></>}
       </div>
       <div className="dialogues-area">
         <div className="topic-area">
@@ -84,17 +90,25 @@ export function Feed({ setSelectedDialogue, isSearch, setUserTopics }: FeedProps
             <div
               className={`dialogue ${selectedDialogueIndex === index ? 'selected' : ''}`}
               onClick={() => selectDialogue(index)}
-              key={samsum.id}> {samsum.dialogue}
+              key={samsum.id}
+            >
+              {samsum.dialogue}
             </div>
           ))}
         </div>
         <div className="divider" />
         <div className="divider" />
-        <button className="summarize-button" onClick={() => setShowPopup(true)} disabled={selectedDialogueIndex === -1}>{buttonText}</button>
+        <button 
+          className="summarize-button" 
+          onClick={() => setShowPopup(true)} 
+          disabled={selectedDialogueIndex === -1}
+        >
+          {buttonText}
+        </button>
         {showPopup && (
-        <TopicInputPopup onClose={handlePopupClose} onSave={handlePopupSave} />
-      )}
+          <TopicInputPopup onClose={handlePopupClose} onSave={handlePopupSave} />
+        )}
       </div>
-    </>
+    </div>
   );
 }
