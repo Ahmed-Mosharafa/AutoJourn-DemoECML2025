@@ -1,90 +1,90 @@
 .api-selector {
-  position: absolute;
-  top: -12vh;
+  position: relative;
+  top: -7vh;
+  width: 100%; /* Make it full-width for better alignment */
+  min-width: 1000px;
+  max-width: 1000px;
+}
+.feed-wrapper {
+  max-width: 1000px; /* Set your desired max width */
+  margin: 0 auto; /* Center the wrapper horizontally */
+  width: 100%; /* Allow it to be responsive */
+  min-width: 1000px;
 }
 .dialogues-area {
   display: flex;
-  max-width: 547px;
   flex-direction: column;
+  max-width: 1000px;
   font-size: 16px;
   line-height: 150%;
-  padding: 24px 0px 100px;
+  padding: 24px 20px 100px; /* Adjust padding for better spacing */
+  background-color: #f9f9f9; /* Light background for contrast */
+  border-radius: 8px; /* Rounded corners for better aesthetics */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
 }
+
 .topic-area {
-  align-self: start;
   display: flex;
   margin-top: 20px;
   gap: 4px;
 }
+
 .topic-title {
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 1;
-  color: #000;
-  text-overflow: ellipsis;
-  font-family: Inter, sans-serif;
-  font-weight: 500;
+  color: #333;
+  font-weight: 600; /* Make title bolder */
 }
+
 .topic {
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 1;
-  color: #828282;
-  text-overflow: ellipsis;
-  font-family: Inter, sans-serif;
-  font-weight: 400;
+  color: #0a0000;
 }
+
 .fetch-time {
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 1;
-  align-self: start;
   color: #828282;
-  text-overflow: ellipsis;
-  font-family: Inter, sans-serif;
-  font-weight: 400;
+  margin-bottom: 20px; /* Space below for clarity */
 }
+
 .dialogue-list {
   display: flex;
+  flex-direction: column;
   margin-top: 30px;
   width: 100%;
-  flex-direction: column;
-  color: #000;
-  font-weight: 500;
-  line-height: 24px;
-  padding: 0 20px;
+  padding: 20 20px;
   height: 350px;
-  overflow-y: scroll;
+  overflow-y: auto; /* Changed to auto for better usability */
 }
+
 .dialogue {
   font-family: Inter, sans-serif;
-  max-width: 480px;
-  justify-content: center;
+  max-width: 100%; /* Ensure it takes full width */
   border-radius: 10px;
-  border-color: rgba(130, 130, 130, 1);
-  border-style: solid;
-  border-width: 1px;
+  border: 1px solid rgba(130, 130, 130, 1);
   background-color: #fff;
-  margin-top: 35px;
+  margin-top: 15px; /* Reduced space between dialogues */
   padding: 12px 16px;
-  cursor: pointer;
+  transition: background-color 0.3s; /* Smooth transition for hover */
 }
+
 .dialogue.selected {
-  background-color: #C0C0C0;
+  background-color: #0073e6; /* Change selected color for visibility */
+  color: white; /* White text for selected dialogue */
 }
+
 .dialogue:hover:not(.selected) {
-  background-color: #F0F0F0;
+  background-color: #f0f0f0; /* Keep hover effect for non-selected */
 }
+
 .divider {
   background-color: #e0e0e0;
   min-height: 1px;
-  margin-top: 32px;
-  width: 100%;
+  margin: 20px 0; /* Space above and below for clarity */
 }
 
 .summarize-button {
   font-family: Inter, sans-serif;
   border-radius: 8px;
-  background-color: rgba(0, 0, 0);
+  background-color: #0073e6; /* Primary color for button */
   align-self: center;
-  margin-top: 17px;
+  margin-top: 20px; /* Increased margin for spacing */
   width: 343px;
   max-width: 100%;
   color: #fff;
@@ -92,19 +92,14 @@
   padding: 14px 24px;
   font-size: 16px;
   cursor: pointer;
-}
-.summarize-button:disabled {
-  font-family: Inter, sans-serif;
-  border-radius: 8px;
-  background-color: rgba(0, 0, 0, 0.7);
-  align-self: center;
-  margin-top: 17px;
-  width: 343px;
-  max-width: 100%;
-  color: #fff;
-  font-weight: 500;
-  padding: 14px 24px;
-  font-size: 16px;
-  cursor: not-allowed;
+  transition: background-color 0.3s; /* Smooth transition for button */
 }
 
+.summarize-button:hover:not(:disabled) {
+  background-color: #005bb5; /* Darker shade on hover */
+}
+
+.summarize-button:disabled {
+  background-color: rgba(0, 0, 0, 0.5); /* Disabled state styling */
+  cursor: not-allowed; /* Not-allowed cursor for disabled button */
+}

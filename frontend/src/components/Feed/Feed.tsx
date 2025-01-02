@@ -25,33 +25,75 @@ export function Feed({ setSelectedDialogue, isSearch, setUserTopics }: FeedProps
   const { searchQuery, setSearchQuery, setIsSummarize, conversations } = useStore();
   const [selectedAPI, setSelectedAPI] = useState(APIConstants.REDDIT);
   const [selectedDialogueIndex, setselectedDialogueIndex] = useState(-1);
+  const [loadingSearch, setLoadingSearch] = useState(false); // New loading state
   const { data: conversationResponse, loading, error } = useFetchSearch(selectedAPI);
   const [showPopup, setShowPopup] = useState<boolean>(false);
-  const [topics, setTopics] = useState<string[]>([]);
+  const [selectedOption, setSelectedOption] = useState<string>("");
 
   const handlePopupClose = () => {
     setShowPopup(false);
   };
 
-  const handlePopupSave = (newTopics: string[]) => {
-    setTopics(newTopics);
-    summarizeText(newTopics)
+  //const handlePopupSave = (selectedOption: string) => {
+  //  setSelectedOption(selectedOption);
+  //  summarizeText(selectedOption);
+  //};
+
+  const handlePopupSave = async (selectedOption: string) => {
+    setSelectedOption(selectedOption);
+    console.log(`Selected option: ${selectedOption}`); // Debugging
+    console.log(`Endpoint: /topics/${selectedOption}`);
+
+    const requestBody = {
+      conversations: conversations.map((conv) => conv.dialogue),
+    };
+    console.log("Request body:", requestBody);
+    // Concatenate all dialogues into a single string for the original text
+    const combinedText = conversations.map((conv) => conv.dialogue).join(" ");
+  
+    try {
+      const response = await fetch(`http://127.0.0.1:8787/topics/${selectedOption}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          conversations: conversations.map((conv) => conv.dialogue),
+          selectedModel: selectedOption
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Failed to fetch topics: ${response.statusText}`);
+      }
+  
+      const data = await response.json();
+      console.log(`Topics received from ${selectedOption}:`, data);
+      //navigate("/topics", { state: { topics: data.topics, keywords: data.keywords } });
+      navigate("/topics", { state: { topics: data.topics, keywords: data.keywords, originalText: combinedText } });
+    } catch (error) {
+      console.error(`Error fetching topics with ${selectedOption}:`, error);
+    }
   };
+  
+  
+  
+
   const title = "Topic: ";
   let source = `Using ${selectedAPI} API`;
   const buttonText = "Summarize Text";
 
-  const summarizeText = (userTopics: string[]) => {
+  const summarizeText = (selectedOption: string) => {
     if (!conversationResponse) {
       return;
     }
     if (selectedDialogueIndex !== -1) {
-      setSelectedDialogue(conversationResponse[selectedDialogueIndex])
-      setUserTopics(userTopics)
-      setIsSummarize(true)
-      navigate('/summary');
+      setSelectedDialogue(conversationResponse[selectedDialogueIndex]);
+      setUserTopics([selectedOption]); // Save the selected option
+      setIsSummarize(true);
+      navigate("/summary");
     }
-  }
+  };
 
   const selectDialogue = (index: number) => {
     if (selectedDialogueIndex === index) {
@@ -59,19 +101,25 @@ export function Feed({ setSelectedDialogue, isSearch, setUserTopics }: FeedProps
     } else {
       setselectedDialogueIndex(index);
     }
-  }
+  };
+
+  const handleSearch = async (query: string) => {
+    setLoadingSearch(true); // Start loading animation
+    await setSearchQuery(query); // Assuming this triggers the data fetch
+    setLoadingSearch(false); // Stop loading animation after search
+  };
 
   if (error) {
-    return <div> {error}</div>
+    return <div> {error}</div>;
   }
-  if (loading) {
-    return <CircularLoader />
+  if (loading || loadingSearch) {
+    return <CircularLoader />;
   }
   return (
-    <>
+    <div className="feed-wrapper"> {/* Add wrapper div for max width */}
       <div className="api-selector">
         <ApiSelector setSelectedAPI={setSelectedAPI} />
-        {isSearch ? <SearchBar setSearchQuery={setSearchQuery} /> : <></>}
+        {isSearch ? <SearchBar setSearchQuery={handleSearch} /> : <></>}
       </div>
       <div className="dialogues-area">
         <div className="topic-area">
@@ -82,19 +130,27 @@ export function Feed({ setSelectedDialogue, isSearch, setUserTopics }: FeedProps
         <div className="dialogue-list">
           {(conversations ?? []).map((samsum, index) => (
             <div
-              className={`dialogue ${selectedDialogueIndex === index ? 'selected' : ''}`}
+              className={`dialogue ${selectedDialogueIndex === index ? "selected" : ""}`}
               onClick={() => selectDialogue(index)}
-              key={samsum.id}> {samsum.dialogue}
+              key={samsum.id}
+            >
+              {samsum.dialogue}
             </div>
           ))}
         </div>
         <div className="divider" />
         <div className="divider" />
-        <button className="summarize-button" onClick={() => setShowPopup(true)} disabled={selectedDialogueIndex === -1}>{buttonText}</button>
+        <button
+          className="summarize-button"
+          onClick={() => setShowPopup(true)}
+          disabled={selectedDialogueIndex === -1}
+        >
+          {buttonText}
+        </button>
         {showPopup && (
-        <TopicInputPopup onClose={handlePopupClose} onSave={handlePopupSave} />
-      )}
+          <TopicInputPopup onClose={handlePopupClose} onSave={handlePopupSave} />
+        )}
       </div>
-    </>
+    </div>
   );
 }

@@ -3,57 +3,55 @@ import "./Popup.css";
 
 interface TopicInputPopupProps {
   onClose: () => void;
-  onSave: (topics: string[]) => void;
+  onSave: (selectedOption: string) => void;
 }
 
 const TopicInputPopup: React.FC<TopicInputPopupProps> = ({ onClose, onSave }) => {
-  const [topics, setTopics] = useState<string[]>([""]);
+  const [selectedOption, setSelectedOption] = useState<string>("");
 
-  const handleTopicChange = (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
-    const newTopics = [...topics];
-    newTopics[index] = event.target.value;
-    setTopics(newTopics);
-  };
-
-  const handleAddTopic = () => {
-    setTopics([...topics, ""]);
-  };
-
-  const handleRemoveTopic = (index: number) => {
-    const newTopics = topics.filter((_, i) => i !== index);
-    setTopics(newTopics);
+  const handleOptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSelectedOption(event.target.value);
   };
 
   const handleSave = () => {
-    onSave(topics.filter(topic => topic.trim() !== "")); // Save non-empty topics
-    onClose(); // Close the popup
+    if (selectedOption.trim() !== "") {
+      onSave(selectedOption); // Save the selected option
+      onClose(); // Close the popup
+    } else {
+      alert("Please select an option before saving.");
+    }
   };
 
   return (
     <div className="popup-overlay">
       <div className="popup-content">
-        <h2>Add Topics</h2>
-        {topics.map((topic, index) => (
-          <div key={index} className="topic-input">
+        <h2>Select Topic Modelling Method</h2>
+        <div>
+          <label>
             <input
-              type="text"
-              value={topic}
-              onChange={(event) => handleTopicChange(index, event)}
-              placeholder={`Topic ${index + 1}`}
+              type="radio"
+              name="topicModelling"
+              value="Mistral"
+              checked={selectedOption === "Mistral"}
+              onChange={handleOptionChange}
             />
-            <button onClick={() => handleRemoveTopic(index)} disabled={topics.length === 1}>
-              Remove
-            </button>
-          </div>
-        ))}
-        <button onClick={handleAddTopic}>Add Another Topic</button>
+            Topic Modelling with Mistral
+          </label>
+        </div>
+        <div>
+          <label>
+            <input
+              type="radio"
+              name="topicModelling"
+              value="Phi"
+              checked={selectedOption === "Phi"}
+              onChange={handleOptionChange}
+            />
+            Topic Modelling with Phi
+          </label>
+        </div>
         <div className="popup-actions">
-        <button onClick={handleSave}>
-          {topics.filter(topic => topic.trim() !== "").length === 0 
-            ? "Continue Without Adding" 
-            : "Save"}
-        </button>
-
+          <button onClick={handleSave}>Save</button>
           <button onClick={onClose}>Cancel</button>
         </div>
       </div>

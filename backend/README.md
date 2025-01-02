@@ -23,14 +23,23 @@ $ pipenv install
 $ virtualenv -p python3 venv
 $ source venv/bin/activate
 ```
+My version:
+```
+$ python3.11 -m venv venv
+$ source venv/bin/activate
+```
 
 - Install the app and its dependencies with pip. Inside the app root folder (the one containing `requirements.txt`, run the following command)
 
 ```
 $ pip3 install -r requirements.txt
 ```
+My version
+```
+$ pip install -r requirements.txt
+```
 
-- Export the environment varialbes in the `.env` file.
+- Export the environment variables in the `.env` file.
 
 ```
 $ set -a; source .env; set +a

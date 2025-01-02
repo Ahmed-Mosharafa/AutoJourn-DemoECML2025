@@ -9,6 +9,7 @@ import { Settings } from "./components/Settings/Settings";
 import { useState } from "react";
 import { Samsum } from "./backend-objects/Samsum";
 import { CompareSummaries } from "./components/CompareSummaries/CompareSummaries";
+import TopicsPage from "./components/Topics/TopicsPage";
 
 function App() {
   const [selectedDialogue, setSelectedDialogue] = useState<Samsum | null>(null);
@@ -43,6 +44,8 @@ function App() {
               selectedDialogue={selectedDialogue} />}
             />
             <Route path="/settings" element={<Settings />} />
+             {/* Add the TopicsPage route */}
+             <Route path="/topics" element={<TopicsPage />} />
           </Routes>
         </div>
       </BrowserRouter>
