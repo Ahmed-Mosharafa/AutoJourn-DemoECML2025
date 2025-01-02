@@ -25,8 +25,8 @@ class Config:
     SUMMARIZATION_MODEL = ''  # summarization model from hugging-face
 
     # Telegram API config
-    TELEGRAM_API_ID = ""
-    TELEGRAM_API_HASH = ""
+    TELEGRAM_API_ID = "22557261"
+    TELEGRAM_API_HASH = "777fd1cf942701becad6259a61212e88"
     MAX_NUM_OF_TELEGRAM_CHANNELS = 0
     MAX_NUM_OF_TELEGRAM_MESSAGES_PER_CHANNEL = 0
     TELEGRAM_PHONE_NUMBER = ""

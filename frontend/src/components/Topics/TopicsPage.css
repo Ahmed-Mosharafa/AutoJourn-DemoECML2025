@@ -1,0 +1,127 @@
+.topics-container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 100%;
+}
+
+.topics-left,
+.topics-right {
+  flex: 1;
+  padding: 20px;
+}
+
+.topics-left {
+  border-right: 1px solid #ccc;
+}
+
+.topics-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+h1 {
+  margin-bottom: 20px;
+}
+
+.original-text-container {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.original-text-container h2 {
+  margin-bottom: 10px;
+}
+
+.scrollable-text {
+  max-height: 200px; /* Set maximum height for the scrollable area */
+  overflow-y: auto; /* Add a vertical scrollbar */
+  background-color: #f9f9f9;
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap; /* Preserve formatting */
+}
+
+.topics-bubbles {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px; /* Space between bubbles */
+  margin-top: 20px;
+}
+
+.bubble {
+  position: relative; /* Needed for the hover text */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #007bff;
+  color: white;
+  border-radius: 50%;
+  text-align: center;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  font-size: 14px;
+  font-weight: bold;
+  transition: transform 0.3s ease; /* Smooth hover scaling */
+}
+
+.bubble:hover {
+  transform: scale(1.1); /* Slightly enlarge the bubble on hover */
+}
+
+.bubble::after {
+  content: attr(data-percentage); /* Use the data-percentage attribute for hover text */
+  position: absolute;
+  bottom: -25px; /* Position the percentage below the bubble */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: white;
+  font-size: 12px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  opacity: 0; /* Hidden by default */
+  pointer-events: none; /* Prevent interactions */
+  transition: opacity 0.3s ease; /* Smooth fade-in */
+}
+
+.bubble:hover::after {
+  opacity: 1; /* Show the percentage on hover */
+}
+
+.bubble-text {
+  padding: 10px;
+  word-wrap: break-word;
+  text-align: center;
+}
+
+.back-button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.back-button:hover {
+  background-color: #0056b3;
+}
+
+.summary-placeholder {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 100%;
+  text-align: center;
+  font-size: 16px;
+  color: #555;
+}

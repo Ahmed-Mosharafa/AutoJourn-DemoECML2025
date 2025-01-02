@@ -1,6 +1,6 @@
 .api-selector {
-  position: absolute;
-  top: -12vh;
+  position: relative;
+  top: -7vh;
   width: 100%; /* Make it full-width for better alignment */
   min-width: 1000px;
   max-width: 1000px;
