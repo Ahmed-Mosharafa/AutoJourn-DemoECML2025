@@ -38,11 +38,24 @@ My version
 ```
 $ pip install -r requirements.txt
 ```
+```
+ollama pull mistral
+```
+
+- Install Redis for caching
+```
+$ brew install redis
+```
 
 - Export the environment variables in the `.env` file.
 
 ```
 $ set -a; source .env; set +a
+```
+
+## Run the Redis server for caching
+```
+$ brew services start redis
 ```
 
 

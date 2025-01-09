@@ -6,6 +6,8 @@ import json
 import numpy as np
 import pandas as pd
 from langchain_ollama.llms import OllamaLLM
+# from langchain.llms import Ollama
+#from langchain_community.llms import Ollama
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 
@@ -18,12 +20,12 @@ class MistralTopicModeling(TopicModeling):
     def __init__(self, num_topics: int=5, model_name: str = "mistral", redis_host="localhost", redis_port=6379):
         self.num_topics = num_topics
         self.model_mistral = OllamaLLM(model=model_name)  # Initialize the Ollama LLM with the Mistral model.
-        self.sentence_model = SentenceTransformer("all-MiniLM-L6-v2")  # For embeddings.
-        self.umap_model = UMAP(n_neighbors=15,
-                               transform_seed=173,  # Fix seed for reproducibility.
-                               n_components=5,
-                               min_dist=0.0,
-                               metric='cosine')
+        # self.sentence_model = SentenceTransformer("all-MiniLM-L6-v2")  # For embeddings.
+        # self.umap_model = UMAP(n_neighbors=15,
+        #                        transform_seed=173,  # Fix seed for reproducibility.
+        #                        n_components=5,
+        #                        min_dist=0.0,
+        #                        metric='cosine')
 
     def preprocess(self, text):
         """Clean the input text by removing links, tags, and emojis."""
@@ -77,7 +79,7 @@ class MistralTopicModeling(TopicModeling):
         """
         preprocessed_doc = self.preprocess(doc)
         prompt = f"""
-        Analyze the following text and provide the {self.num_topics} most suitable topics for it, along with their percentages and the relevant 15 keywords.
+        Analyze the following text and provide at least {self.num_topics} most suitable topics for it, along with their percentages and the relevant 15 keywords.
         Text:
         {preprocessed_doc}
         Format the output as a JSON object: {{"topics": [{{"name": "Topic1", "percentage": 25.0, "keywords": ['keyword1','keyword2',..]}}, ...]}}
@@ -138,7 +140,6 @@ class MistralTopicModeling(TopicModeling):
         ]
         
         return probs, keywords, topics, topics_and_keywords
-
 
     def check_topic_count(self, num_topics):
         """Ensure the number of topics matches the specified count."""
