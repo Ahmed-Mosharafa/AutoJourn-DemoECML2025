@@ -27,7 +27,7 @@ export const useFetchSearch = (apiConstant: APIConstants) => {
 
     const { searchQuery, setConversations } = useStore();
     const [data, setData] = useState<[Samsum] | null>(null);
-    const [loading, setLoading] = useState<boolean>(true);
+    const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -38,6 +38,7 @@ export const useFetchSearch = (apiConstant: APIConstants) => {
                 setError(null);
                 return;
             }
+            setLoading(true)
             try {
                 const data = await api.getFeedData(searchQuery);
                 setData(data);
@@ -46,6 +47,8 @@ export const useFetchSearch = (apiConstant: APIConstants) => {
             } catch (error) {
                 setError("Error fetching data");
                 setLoading(false);
+            }finally {
+                setLoading(false); // Stop loading
             }
         }
 

@@ -13,12 +13,29 @@ const TopicsPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { topics, originalText } = location.state || {};
+  const { topics, originalText, topicsAndKeywords, keywords } = location.state || {};
+
+
 
   const [summaries, setSummaries] = useState<{ [key: string]: string }>({});
   const [selectedSummary, setSelectedSummary] = useState<string | null>(null);
   const [hoveredTopic, setHoveredTopic] = useState<string | null>(null); // Track the hovered topic
   const [loadingSummary, setLoadingSummary] = useState<boolean>(false); // Loading state for summary
+  const [showTopicPopup, setShowTopicPopup] = useState<boolean>(false); // topic selection Popup visibility
+  const [showStylePopup, setShowStylePopup] = useState<boolean>(false); // style selection popup
+  const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false); // State for loading screen
+  const styles = [
+    "formal",
+    "academic",
+    "gen_z",
+    "narrative",
+    "persuasive",
+    "satirical",
+    "conversational",
+    "poetic",
+    "investigative",
+  ]; // List of styles
 
   // Fetch summaries when the component mounts
   useEffect(() => {
@@ -87,7 +104,54 @@ const TopicsPage = () => {
       },
     ],
   };
+
   
+  // Handle topic click
+  const handleTopicClick = (topic: string) => {
+    setSelectedTopic(topic);
+    setShowTopicPopup(false);
+    setShowStylePopup(true); // Open the style selection popup
+  };
+  // Handle style selection
+  const handleStyleClick = async (style: string) => {
+    //setShowStylePopup(false); // Close the style selection popup
+    setIsLoading(true); // Show loading screen
+
+    if (selectedTopic) {
+      
+      try {
+        const summary = summaries[selectedTopic];
+        const keywordsSent = keywords[selectedTopic];
+        const requestBody = {
+          topic: selectedTopic,
+          summary,
+          keywordsSent,
+          style,
+        };
+
+        const response = await fetch("http://127.0.0.1:8787/generate-news", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestBody),
+        });
+        console.log("Data sent to backend", requestBody);
+        console.log(response) 
+
+        if (response.ok) {
+          const { article } = await response.json();
+          navigate("/news-article", { state: { article } });
+        } else {
+          console.error("Failed to generate news article.");
+        }
+      } catch (error) {
+        console.error("Error generating news article:", error);
+      }finally {
+        setIsLoading(false); // Hide loading screen
+      }
+    }
+  };
+
+
 
   if (!topics || !originalText) {
     return (
@@ -126,10 +190,7 @@ const TopicsPage = () => {
                       <div
                         key={index}
                         className="bubble"
-                        style={{
-                          width: 100,
-                          height: 90,
-                        }}
+                        
                         data-percentage={`${percentage}%`}
                         onClick={() => handleBubbleClick(topicName)} // Re-fetch summaries on click
                         onMouseEnter={() => setHoveredTopic(`${topicName} (${percentage}%)`)} // Set tooltip text on hover
@@ -155,6 +216,9 @@ const TopicsPage = () => {
         <button className="back-button" onClick={() => navigate("/")}>
           Back to Home
         </button>
+        <button className="generate-article-button" onClick={() => setShowTopicPopup(true)}>
+          Generate News Article
+        </button>
       </div>
 
       {/* Second Column */}
@@ -173,11 +237,49 @@ const TopicsPage = () => {
           )}
           </div>
         </div>
-
-        
-
-
       </div>
+
+      {/*Topic Popup*/}
+      {showTopicPopup && (
+        <div className="popup-overlay">
+          <div className="popup-content">
+            <h2>To generate News Article, choose the topic from below:</h2>
+            <ul>
+              {Object.keys(topics).map((topic, index) => (
+                <li key={index} onClick={() => handleTopicClick(topic)}>
+                  {topic}
+                </li>
+              ))}
+            </ul>
+            <button onClick={() => setShowTopicPopup(false)}>Close</button>
+          </div>
+        </div>
+      )}
+
+      {/* Style Selection Popup */}
+      {showStylePopup && (
+        <div className="popup-overlay">
+          {isLoading ? (
+            <div className="loading-screen">
+              <div className="spinner"></div>
+              <p>Loading, please wait...</p>
+            </div>
+          ) : (
+            <div className="popup-content">
+              <h2>Choose a style</h2>
+              <ul>
+                {styles.map((style, index) => (
+                  <li key={index} onClick={() => handleStyleClick(style)}>
+                    {style}
+                  </li>
+                ))}
+              </ul>
+              <button onClick={() => setShowStylePopup(false)}>Close</button>
+            </div>
+      )}
+  </div>
+)}
+
     </div>
   );
 };

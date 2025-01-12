@@ -165,38 +165,6 @@ from concurrent.futures import ThreadPoolExecutor
 executor = ThreadPoolExecutor(max_workers=5)
 @api.route('/topics/Mistral', methods=['POST'])
 class Topics(Resource):
-    # @api.doc(body=api.model(
-    #     'Topics',
-    #     {
-    #         'conversations': fields.List(fields.String, description='list of conversations')
-    #     })
-    # )
-    # def post(self):
-    #     try:
-    #         # Parse input
-    #         conversation_list = request.json["conversations"]
-
-    #         # # Preprocess conversations and concatenate them into one string
-    #         # preprocessed_conversations = [
-    #         #     phi_modeling.preprocess(conversation) for conversation in conversation_list
-    #         # ]
-    #         combined_conversations = " ".join(conversation_list)
-
-    #         # Dynamically extract topics
-    #         #probs, keywords, topics = phi_modeling.get_topics(combined_conversations)
-
-    #         probs, keywords, topics = mistral_modeling.get_topics(combined_conversations)
-
-    #         # Create a response
-    #         response = {
-    #             "topics": probs,  # Probabilities for each topic
-    #             "index_to_topic": topics,  # List of topic names
-    #             "keywords": keywords  # Keywords associated with each topic
-    #         }
-    #         return jsonify(response)
-
-    #     except Exception as e:
-    #         return {"error": str(e)}, 400
 
     def post(self):
         selectedOption= "mistral"
@@ -239,7 +207,8 @@ class Topics(Resource):
             response = {
                 "topics": probs,  # Probabilities for each topic
                 "index_to_topic": topics,  # List of topic names
-                "keywords": keywords  # Keywords associated with each topic
+                "keywords": keywords,  # Keywords associated with each topic
+                "topics_and_keywords": topics_and_keywords
             }
             return jsonify(response)
         except Exception as e:
@@ -272,6 +241,26 @@ class Summaries(Resource):
             print(f"Error retrieving summaries: {e}")
             return {"error": f"Failed to retrieve summaries: {e}"}, 400
 
+@api.route('/generate-news', methods=['POST'])
+class GenerateNews(Resource):
+    def post(self):
+        try:
+            # Parse the request body
+            data = request.json
+            topic = data.get("topic")
+            summary = data.get("summary")
+            keywords = data.get("keywordsSent")
+            style = data.get("style")
+            
+
+            # Generate the news article
+            article = mistral_modeling.generate_news_article(topic, summary, keywords, style)
+            print("Generated news:", article)
+
+            return jsonify({"article": article})
+        except Exception as e:
+            return {"error": str(e)}, 400
+        
 
 
 

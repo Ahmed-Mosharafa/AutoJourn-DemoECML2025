@@ -25,7 +25,7 @@ export function Feed({ setSelectedDialogue, isSearch, setUserTopics }: FeedProps
   const { searchQuery, setSearchQuery, setIsSummarize, conversations } = useStore();
   const [selectedAPI, setSelectedAPI] = useState(APIConstants.REDDIT);
   const [selectedDialogueIndex, setselectedDialogueIndex] = useState(-1);
-  const [loadingSearch, setLoadingSearch] = useState(false); // New loading state
+  const [loadingSearch, setLoadingSearch] = useState(false); // search loading state
   const { data: conversationResponse, loading, error } = useFetchSearch(selectedAPI);
   const [showPopup, setShowPopup] = useState<boolean>(false);
   const [selectedOption, setSelectedOption] = useState<string>("");
@@ -70,7 +70,7 @@ export function Feed({ setSelectedDialogue, isSearch, setUserTopics }: FeedProps
       const data = await response.json();
       console.log(`Topics received from ${selectedOption}:`, data);
       //navigate("/topics", { state: { topics: data.topics, keywords: data.keywords } });
-      navigate("/topics", { state: { topics: data.topics, keywords: data.keywords, originalText: combinedText } });
+      navigate("/topics", { state: { topics: data.topics, keywords: data.keywords, originalText: combinedText, topicsAndKeywords: data.topics_and_keywords } });
     } catch (error) {
       console.error(`Error fetching topics with ${selectedOption}:`, error);
     }
@@ -105,21 +105,26 @@ export function Feed({ setSelectedDialogue, isSearch, setUserTopics }: FeedProps
 
   const handleSearch = async (query: string) => {
     setLoadingSearch(true); // Start loading animation
-    await setSearchQuery(query); // Assuming this triggers the data fetch
-    setLoadingSearch(false); // Stop loading animation after search
+    setSearchQuery(query); // Assuming this triggers the data fetch
+    //setLoadingSearch(false); // Stop loading animation after search
   };
 
   if (error) {
     return <div> {error}</div>;
   }
   if (loading || loadingSearch) {
-    return <CircularLoader />;
+    return (
+      <div className="loading-screen">
+      <div className="spinner"></div>
+      <p>Loading conversations, please wait...</p>
+    </div>
+    );
   }
   return (
     <div className="feed-wrapper"> {/* Add wrapper div for max width */}
       <div className="api-selector">
         <ApiSelector setSelectedAPI={setSelectedAPI} />
-        {isSearch ? <SearchBar setSearchQuery={handleSearch} /> : <></>}
+        {isSearch ? <SearchBar setSearchQuery={handleSearch} setLoadingSearch={setLoadingSearch} /> : <></>}
       </div>
       <div className="dialogues-area">
         <div className="topic-area">
