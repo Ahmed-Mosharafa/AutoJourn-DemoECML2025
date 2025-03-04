@@ -42,10 +42,10 @@
 
 import json
 from language_detection.lang_detection import LangDetect
-from summarization.delta_summarization.delta_summarization import DeltaSummarization
-from summarization.models.bart import Bart
-from summarization.agents.agent_factory import AgentsFactory
-from summarization.topic_aware_summarization.topic_aware_summarization import TopicAwareSummarization
+# from summarization.delta_summarization.delta_summarization import DeltaSummarization
+# from summarization.models.bart import Bart
+# from summarization.agents.agent_factory import AgentsFactory
+# from summarization.topic_aware_summarization.topic_aware_summarization import TopicAwareSummarization
 # from api_connection.twitter_api.twitter_api import TweetAPI
 from api_connection.telegram_api.telegram_api import TelegramAPI
 from api_connection.reddit_api.reddit_api import RedditAPI
@@ -77,12 +77,12 @@ config.init()
 tele_api = TelegramAPI()
 reddit_api = RedditAPI()
 
-bertopic = Bertopic(num_topics=10)  # Default number of topics is 10.
-mistral_modeling= MistralTopicModeling()
-summarizer_model = Bart(config.Config.SUMMARIZATION_MODEL)
-summarizer_agent = AgentsFactory.get_agent(summarizer_model)
-topic_aware_summarizer = TopicAwareSummarization()
-delta_summarizer = DeltaSummarization()
+# bertopic = Bertopic(num_topics=10)  # Default number of topics is 10.
+mistral_modeling= MistralTopicModeling(model_name='mistral')
+# summarizer_model = Bart(config.Config.SUMMARIZATION_MODEL)
+# summarizer_agent = AgentsFactory.get_agent(summarizer_model)
+# topic_aware_summarizer = TopicAwareSummarization()
+# delta_summarizer = DeltaSummarization()
 lang_detect = LangDetect()
 
 samsum = api.model('Samsum', {
@@ -165,38 +165,6 @@ from concurrent.futures import ThreadPoolExecutor
 executor = ThreadPoolExecutor(max_workers=5)
 @api.route('/topics/Mistral', methods=['POST'])
 class Topics(Resource):
-    # @api.doc(body=api.model(
-    #     'Topics',
-    #     {
-    #         'conversations': fields.List(fields.String, description='list of conversations')
-    #     })
-    # )
-    # def post(self):
-    #     try:
-    #         # Parse input
-    #         conversation_list = request.json["conversations"]
-
-    #         # # Preprocess conversations and concatenate them into one string
-    #         # preprocessed_conversations = [
-    #         #     phi_modeling.preprocess(conversation) for conversation in conversation_list
-    #         # ]
-    #         combined_conversations = " ".join(conversation_list)
-
-    #         # Dynamically extract topics
-    #         #probs, keywords, topics = phi_modeling.get_topics(combined_conversations)
-
-    #         probs, keywords, topics = mistral_modeling.get_topics(combined_conversations)
-
-    #         # Create a response
-    #         response = {
-    #             "topics": probs,  # Probabilities for each topic
-    #             "index_to_topic": topics,  # List of topic names
-    #             "keywords": keywords  # Keywords associated with each topic
-    #         }
-    #         return jsonify(response)
-
-    #     except Exception as e:
-    #         return {"error": str(e)}, 400
 
     def post(self):
         selectedOption= "mistral"
@@ -209,10 +177,8 @@ class Topics(Resource):
 
             # Dynamically choose the topic modeling method
             if selectedOption.lower() == "mistral":
-                probs, keywords, topics, topics_and_keywords = mistral_modeling.get_topics_test(combined_conversations)
-            #elif selectedOption.lower() == "phi":
-                # Assuming a PhiModeling class exists
-                #probs, keywords, topics = phi_modeling.get_topics(combined_conversations)
+                # probs, keywords, topics, topics_and_keywords = mistral_modeling.get_topics_test(combined_conversations)
+                probs, keywords, topics, topics_and_keywords = mistral_modeling.get_topics(combined_conversations)
             else:
                 return {"error": f"Invalid option: {selectedOption}"}, 400
 
@@ -221,7 +187,8 @@ class Topics(Resource):
             def infer_and_cache_summaries():
                 try:
                     # Generate summaries
-                    summaries = mistral_modeling.summarize_with_hint_test(combined_conversations, topics_and_keywords)
+                    # summaries = mistral_modeling.summarize_with_hint_test(combined_conversations, topics_and_keywords)
+                    summaries = mistral_modeling.summarize_with_hint(combined_conversations, topics_and_keywords)
                     print("Generated summaries:", summaries)  # Debug log to confirm summaries are generated
 
                     # Cache summaries asynchronously
@@ -240,7 +207,8 @@ class Topics(Resource):
             response = {
                 "topics": probs,  # Probabilities for each topic
                 "index_to_topic": topics,  # List of topic names
-                "keywords": keywords  # Keywords associated with each topic
+                "keywords": keywords,  # Keywords associated with each topic
+                "topics_and_keywords": topics_and_keywords
             }
             return jsonify(response)
         except Exception as e:
@@ -254,11 +222,14 @@ class Summaries(Resource):
             # Fetch summaries asynchronously
             async def fetch_cached_summaries():
                 summaries = await redis_client.get("mistral_summaries")
-                if summaries:
-                    await redis_client.delete("mistral_summaries")  # Delete the key after retrieval
+                print("summaries Ok")
+                #if summaries:
+                    #await redis_client.delete("mistral_summaries")  # Delete the key after retrieval
                 return json.loads(summaries) if summaries else None
 
             cached_summaries = asyncio.run(fetch_cached_summaries())
+            print("cached summaries::")
+            print(cached_summaries)
 
             if not cached_summaries:
                 print("Summaries not found in Redis.")
@@ -270,6 +241,26 @@ class Summaries(Resource):
             print(f"Error retrieving summaries: {e}")
             return {"error": f"Failed to retrieve summaries: {e}"}, 400
 
+@api.route('/generate-news', methods=['POST'])
+class GenerateNews(Resource):
+    def post(self):
+        try:
+            # Parse the request body
+            data = request.json
+            topic = data.get("topic")
+            summary = data.get("summary")
+            keywords = data.get("keywordsSent")
+            style = data.get("style")
+            
+
+            # Generate the news article
+            article = mistral_modeling.generate_news_article(topic, summary, keywords, style)
+            print("Generated news:", article)
+
+            return jsonify({"article": article})
+        except Exception as e:
+            return {"error": str(e)}, 400
+        
 
 
 
@@ -343,7 +334,8 @@ class TopicAwareSummarize(Resource):
 
             # Perform summarization
             topics_and_keywords = cached_topics["topics_and_keywords"]
-            summaries = mistral_modeling.summarize_with_hint_test(combined_conversations, topics_and_keywords)
+            # summaries = mistral_modeling.summarize_with_hint_test(combined_conversations, topics_and_keywords)
+            summaries = mistral_modeling.summarize_with_hint(combined_conversations, topics_and_keywords)
 
             return jsonify({"summaries": summaries})
         except Exception as e:

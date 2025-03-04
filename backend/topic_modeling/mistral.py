@@ -86,7 +86,7 @@ class MistralTopicModeling(TopicModeling):
 
         #prompt here
         prompt = [f"""
-            Analyze the following text and provide the 5 most suitable topics for it, along with their percentages and the relevant 15 keywords.
+            Analyze the following text and provide the 5 most suitable topics for it, along with their percentages and the relevant 5 keywords.
             Text:
             {preprocessed_doc}
             Format the output as a JSON object: {{"topics": [{{"name": "Topic1", "percentage": 25.0, "keywords": ['keyword1','keyword2',..]}}, ...]}}

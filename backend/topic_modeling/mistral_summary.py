@@ -6,6 +6,8 @@ import json
 import numpy as np
 import pandas as pd
 from langchain_ollama.llms import OllamaLLM
+# from langchain.llms import Ollama
+#from langchain_community.llms import Ollama
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 
@@ -18,12 +20,12 @@ class MistralTopicModeling(TopicModeling):
     def __init__(self, num_topics: int=5, model_name: str = "mistral", redis_host="localhost", redis_port=6379):
         self.num_topics = num_topics
         self.model_mistral = OllamaLLM(model=model_name)  # Initialize the Ollama LLM with the Mistral model.
-        self.sentence_model = SentenceTransformer("all-MiniLM-L6-v2")  # For embeddings.
-        self.umap_model = UMAP(n_neighbors=15,
-                               transform_seed=173,  # Fix seed for reproducibility.
-                               n_components=5,
-                               min_dist=0.0,
-                               metric='cosine')
+        # self.sentence_model = SentenceTransformer("all-MiniLM-L6-v2")  # For embeddings.
+        # self.umap_model = UMAP(n_neighbors=15,
+        #                        transform_seed=173,  # Fix seed for reproducibility.
+        #                        n_components=5,
+        #                        min_dist=0.0,
+        #                        metric='cosine')
 
     def preprocess(self, text):
         """Clean the input text by removing links, tags, and emojis."""
@@ -77,7 +79,7 @@ class MistralTopicModeling(TopicModeling):
         """
         preprocessed_doc = self.preprocess(doc)
         prompt = f"""
-        Analyze the following text and provide the {self.num_topics} most suitable topics for it, along with their percentages and the relevant 15 keywords.
+        Analyze the following text and provide at least {self.num_topics} most suitable topics for it, along with their percentages and the relevant 15 keywords.
         Text:
         {preprocessed_doc}
         Format the output as a JSON object: {{"topics": [{{"name": "Topic1", "percentage": 25.0, "keywords": ['keyword1','keyword2',..]}}, ...]}}
@@ -139,7 +141,6 @@ class MistralTopicModeling(TopicModeling):
         
         return probs, keywords, topics, topics_and_keywords
 
-
     def check_topic_count(self, num_topics):
         """Ensure the number of topics matches the specified count."""
         if self.num_topics != num_topics:
@@ -181,3 +182,68 @@ class MistralTopicModeling(TopicModeling):
             mock_summary = f"This is a mock summary for the topic '{topic_name}' with focus on keywords: {keywords}."
             summaries.append({"topic": topic_name, "summary": mock_summary})
         return summaries
+    
+    def generate_news_article(self, topic, summary, keywords, style):
+        """Generate a long news article based on topic, summary, keywords, and style."""
+        style_prompt = {
+            "formal": "Use a professional and objective tone, suitable for a reputable news outlet.",
+            "academic": "Write in an academic style, using analytical and precise language.",
+            "gen_z": "Use a Gen Z tone, be witty, include pop culture references, and keep it conversational.",
+            "narrative": "Write in a storytelling style, with vivid descriptions and engaging narrative techniques.",
+            "persuasive": "Write persuasively, using emotional and motivational language.",
+            "satirical": "Write in a satirical tone, with humor and irony to critique the subject.",
+            "conversational": "Use a friendly and informal conversational tone.",
+            "poetic": "Write in a poetic style, with metaphorical and rhythmic language.",
+            "investigative": "Write in an investigative tone, presenting facts systematically and focusing on analysis."
+        }
+
+        tone_instructions = style_prompt[style]
+
+        prompt = (
+            f"You are a professional journalist writing for a major news outlet. Your goal is to craft a compelling and detailed news article.\n\n"
+            f"**Topic**: {topic}\n\n"
+            f"**Summary**: {summary}\n\n"
+            f"**Key Points and Keywords**:\n- " + "\n- ".join(keywords) + "\n\n"
+            f"**Style**: {tone_instructions}\n\n"
+            f"**Requirements**:\n"
+            f"1. Write a long, engaging news article (at least 800 words).\n"
+            f"2. Include an attention-grabbing headline at the beginning.\n"
+            f"3. Expand upon the provided summary using the listed keywords. Use them naturally throughout the article.\n"
+            f"4. Include historical context, background, or analysis where relevant.\n"
+            f"5. Use the specified style and tone throughout the article.\n\n"
+            f"Start your response with the headline, followed by the full article."
+        )
+
+        print(f"Generating article for topic: {topic} in {style} style")
+        response = self.model_mistral(prompt)
+        print(f"Article generated for topic: {topic}")
+        return response
+    
+    def generate_news_article_test(self, topic, summary, keywords, style):
+        """Mock version of generate_news_article for testing purposes."""
+        style_descriptions = {
+            "formal": "a professional and objective tone, suitable for a reputable news outlet.",
+            "academic": "an academic style, using analytical and precise language.",
+            "gen_z": "a Gen Z tone, witty and conversational with pop culture references.",
+            "narrative": "a storytelling style with vivid descriptions.",
+            "persuasive": "a persuasive tone, using emotional and motivational language.",
+            "satirical": "a satirical tone with humor and irony.",
+            "conversational": "a friendly and informal conversational tone.",
+            "poetic": "a poetic style, using metaphorical and rhythmic language.",
+            "investigative": "an investigative tone, presenting facts systematically and focusing on analysis."
+        }
+
+        style_description = style_descriptions.get(style, "a general style")
+
+        article = f"""
+        **Headline**: Breaking News: {topic}
+
+        In a remarkable development, {summary}
+
+        This article explores the topic of "{topic}" with a focus on the following key points:
+        - {', '.join(keywords)}
+
+        Written in {style_description}, this piece dives into the intricacies of {topic}, providing insights and detailed analysis.
+        """
+        return article.strip()
+
