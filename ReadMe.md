@@ -22,11 +22,11 @@ In this folder you will find the code we used for the qualitative and quantitati
 
 ## Documentation
 
-You can find the poster we produced to present our project.   
+You can find the poster we produced to present our project in the Winter_24_25 folder. 
 
 ## paper
 
-You can find the paper we wrote.
+You can find the paper we wrote in the WS_24_25 folder.
 
 ## Application UI
 
