@@ -30,6 +30,6 @@ You can find the paper we wrote in the WS_24_25 folder.
 
 ## Application UI
 
-We provide some screenshots to show what the applications look like. 
+We have provided some screenshots to show what the application looks like. 
 A video demo is also available at the link: 
 https://youtu.be/OTMpHAChl-g
