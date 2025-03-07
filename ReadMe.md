@@ -30,4 +30,4 @@ You can find the paper we wrote.
 
 ## Application UI
 
-We provide some screenshots to show what the applications look like. A video demo is also possible at the link: 
+We provide some screenshots to show what the applications look like. A video demo is also available at the link: 
