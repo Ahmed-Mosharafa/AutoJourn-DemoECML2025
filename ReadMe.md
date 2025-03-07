@@ -28,6 +28,6 @@ You can find the poster we produced to present our project.
 
 You can find the paper we wrote.
 
-## UI/UX Design
+## Application UI
 
-In this directory you will find the Figma file (.fig file) of our UI/UX design concept
+We provide some screenshots to show what the applications look like. A video demo is also possible at the link: 
