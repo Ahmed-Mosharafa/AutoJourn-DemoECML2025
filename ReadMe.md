@@ -1,20 +1,32 @@
-# Automated Journalist App - TUM NLP LAB
+# Automated Journalist App - Machine Learning in NLP Lab Course
 
-The automated Journalist App consists of two parts in the code. There is backend and frontend.
-You can find further instructions how to install dependecies and run the app in the README files
-of each directories.
+The project in the Winter Semester 24/25 was implemented by:    
+- Himel Ghosh, himel.ghosh@tum.de       
+- Gianluca Procopio, gianluca.procopio@tum.de         
+- Sina Emami, sina.emami@tum.de     
+
+
+In this repository we present the code for our Automated Journalist application, it is organized as follow:
 
 ## Frontend
 
-In this directory you will find the frontend implementation in Typescript with React
+In this folder you will find the frontend implementation in Typescript with React.
 
 ## Backend
 
-In this directory you will find the backend implementation in Python with Flask
+In this folder you will find the backend implementation in Python, with Flask.
+
+## Evaluation
+
+In this folder you will find the code we used for the qualitative and quantitative evaluations of our pipeline.
 
 ## Documentation
 
-This directory is used to share documentation related material
+You can find relevant documentation for our project.
+
+## PaperWS2024
+
+You can find the paper we wrote.
 
 ## UI/UX Design
 
