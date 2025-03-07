@@ -18,15 +18,16 @@ $ pipenv shell
 $ pipenv install
 ```
 
-### virtualenv
+### Setup Virtual Environment
 ```
 $ virtualenv -p python3 venv
 $ source venv/bin/activate
 ```
-My version:
+
+MacOS:
 ```
-$ python3.11 -m venv venv
-$ source venv/bin/activate
+$ python3.11 -m venv venv_name
+$ source venv_name/bin/activate
 ```
 
 - Install the app and its dependencies with pip. Inside the app root folder (the one containing `requirements.txt`, run the following command)
@@ -34,10 +35,13 @@ $ source venv/bin/activate
 ```
 $ pip3 install -r requirements.txt
 ```
-My version
+
+MacOS:
 ```
 $ pip install -r requirements.txt
 ```
+
+Retrieve Mistral-7B from Ollama
 ```
 ollama pull mistral
 ```
