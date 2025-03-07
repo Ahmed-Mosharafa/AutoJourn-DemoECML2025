@@ -22,7 +22,7 @@ In this folder you will find the code we used for the qualitative and quantitati
 
 ## Documentation
 
-You can find relevant documentation for our project.
+You can find the poster we produced to present our project.   
 
 ## PaperWS2024
 
