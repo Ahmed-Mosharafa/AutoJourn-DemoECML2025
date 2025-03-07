@@ -10,6 +10,7 @@ You can find the api (swagger) documentation under the link: http://127.0.0.1:87
 
 Python: 3.11
 Mistral: 0.3
+Redis: 4.5.5
 
 You may create a Python environment either by pipenv or virtualenv. In
 the following both installation steps are written. Please select either pipenv
