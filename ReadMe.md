@@ -24,10 +24,12 @@ In this folder you will find the code we used for the qualitative and quantitati
 
 You can find the poster we produced to present our project.   
 
-## PaperWS2024
+## paper
 
 You can find the paper we wrote.
 
 ## Application UI
 
-We provide some screenshots to show what the applications look like. A video demo is also available at the link: 
+We provide some screenshots to show what the applications look like. 
+A video demo is also available at the link: 
+https://youtu.be/OTMpHAChl-g
