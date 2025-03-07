@@ -4,7 +4,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 ## Available Scripts
 
-Node: 23.5.0
+Node: 23.5.0     
 npm: 10.9.1
 
 To install the dependencies please run:
