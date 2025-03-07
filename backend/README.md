@@ -1,12 +1,15 @@
 # Automated Journalist App
 
-Includes the code-base for the NLP Lab Course for Automated Journalist App SOSE2024
+Includes the code-base for the NLP Lab Course for Automated Journalist App WiSE24/25
 
 ## API Documentation
 
 You can find the api (swagger) documentation under the link: http://127.0.0.1:8787/
 
 ## Installation:
+
+Python: 3.11
+Mistral: 0.3
 
 You may create a Python environment either by pipenv or virtualenv. In
 the following both installation steps are written. Please select either pipenv
