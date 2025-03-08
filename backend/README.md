@@ -6,6 +6,10 @@ Includes the code-base for the NLP Lab Course for Automated Journalist App WiSE2
 
 You can find the api (swagger) documentation under the link: http://127.0.0.1:8787/
 
+## Change the config-EXAMPLE.json to config.json in your system 
+and update the placeholders with the corresponding API ID and hash keys. 
+Use your own telegram phone number and password; for a Reddit password, ask privately in Slack.
+
 ## Installation:
 
 Python: 3.11
