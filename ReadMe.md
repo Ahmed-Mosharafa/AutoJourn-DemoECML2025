@@ -6,30 +6,30 @@ The project in the Winter Semester 24/25 was implemented by:
 - Sina Emami, sina.emami@tum.de     
 
 
-In this repository we present the code for our Automated Journalist application, it is organized as follow:
+In this repository, we present the code for our Automated Journalist application; it is organised as follows:
 
 ## Frontend
 
-In this folder you will find the frontend implementation in Typescript with React.
+In this folder, you will find the front-end implementation of Typescript with React.
 
 ## Backend
 
-In this folder you will find the backend implementation in Python, with Flask.
+You will find the backend implementation in Python with Flask in this folder.
 
-## Evaluation
+## Evaluations
 
-In this folder you will find the code we used for the qualitative and quantitative evaluations of our pipeline.
+In this folder, you will find the code we used for our pipeline's qualitative and quantitative evaluations.
 
 ## Documentation
 
-You can find the poster we produced to present our project in the Winter_24_25 folder. 
+The poster we produced to present our project is in the WS24 subfolder. 
 
-## paper
+## Paper
 
-You can find the paper we wrote in the WS_24_25 folder.
+You can find the paper we wrote in the WS24 subfolder.
 
 ## Application UI
 
-We have provided some screenshots to show what the application looks like. 
-A video demo is also available at the link: 
+- We have provided some screenshots to show what the application looks like. 
+- A video demo is also available at the link: 
 https://youtu.be/OTMpHAChl-g
