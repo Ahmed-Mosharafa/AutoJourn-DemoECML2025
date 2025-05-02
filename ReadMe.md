@@ -1,12 +1,14 @@
-# Automated Journalist App - Machine Learning in NLP Lab Course
+# AutoJourn: A Prompt-Based Framework for Social Media Insight Extraction and News Generation
 
-The project in the Winter Semester 24/25 was implemented by:    
+This project is being developed as part of [Ahmed Mosharafa’s](https://soc.cit.tum.de/persons/ahmed-mosharafa/) Ph.D. research at the Research Group Social Computing at TUM. The research investigates how prompt-based LLM pipelines can enable scalable, interpretable tools for journalists, analysts, and communication professionals. Future work will address multilingual support, source attribution, and bias detection in automatically generated narratives.
+
+The project in the Winter Semester 24/25 was co-implemented by:    
 - Himel Ghosh, himel.ghosh@tum.de       
 - Gianluca Procopio, gianluca.procopio@tum.de         
 - Sina Emami, sina.emami@tum.de     
 
-
-In this repository, we present the code for our Automated Journalist application; it is organised as follows:
+## What it does
+Extracts topics from social media content, summarizes them by topic, and generates factual news articles using LLMs.
 
 ## Frontend
 
@@ -32,4 +34,7 @@ You can find the paper we wrote in the WS24 subfolder.
 
 - We have provided some screenshots to show what the application looks like. 
 - A video demo is also available at the link: 
-https://youtu.be/OTMpHAChl-g
+[https://youtu.be/OTMpHAChl-g](https://youtu.be/5T6XlPC2OO4)]
+
+## License
+MIT
