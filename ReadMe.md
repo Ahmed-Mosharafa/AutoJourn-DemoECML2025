@@ -1,5 +1,9 @@
 # AutoJourn: A Prompt-Based Framework for Social Media Insight Extraction and News Generation
 
+This is a demo repository accompanying our ECML PKDD 2025 paper:  
+**"AutoJourn: A Prompt-Based Framework for Social Media Insight Extraction and News Generation."**
+
+
 This project is being developed as part of [Ahmed Mosharafa’s](https://soc.cit.tum.de/persons/ahmed-mosharafa/) Ph.D. research at the Research Group Social Computing at TUM. The research investigates how prompt-based LLM pipelines can enable scalable, interpretable tools for journalists, analysts, and communication professionals. Future work will address multilingual support, source attribution, and bias detection in automatically generated narratives.
 
 The project in the Winter Semester 24/25 was co-implemented by:    
